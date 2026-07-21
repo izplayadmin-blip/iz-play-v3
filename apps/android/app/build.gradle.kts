@@ -6,6 +6,11 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Nomeia os artefatos como IZPlay-V3-<variant>.apk em vez de app-<variant>.apk.
+base {
+    archivesName.set("IZPlay-V3")
+}
+
 android {
     namespace = "com.izplay.v3"
     compileSdk = 36
@@ -15,7 +20,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "3.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

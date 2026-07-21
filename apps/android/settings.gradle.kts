@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Another IPTV Player"
+rootProject.name = "IZPlayV3"
 include(":app")
  
