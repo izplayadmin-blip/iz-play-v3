@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "dev.android.anotheriptvplayer"
+    namespace = "com.izplay.v3"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "dev.android.anotheriptvplayer"
+        applicationId = "com.izplay.v3"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

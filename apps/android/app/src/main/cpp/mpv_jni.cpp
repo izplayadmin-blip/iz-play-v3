@@ -230,7 +230,7 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
   if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
     return -1;
   }
-  jclass localCls = env->FindClass("dev/android/anotheriptvplayer/player/MPVLib$EventListener");
+  jclass localCls = env->FindClass("com/izplay/v3/player/MPVLib$EventListener");
   if (!localCls) {
     LOGE("MPVLib$EventListener not found");
     return -1;
@@ -261,7 +261,7 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
 // ---------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeCreate(JNIEnv*, jclass) {
+Java_com_izplay_v3_player_MPVLib_nativeCreate(JNIEnv*, jclass) {
   mpv_handle* h = mpv_create();
   if (!h) {
     LOGE("mpv_create failed");
@@ -284,14 +284,14 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeCreate(JNIEnv*, jclass) {
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeInitialize(JNIEnv*, jclass, jlong h) {
+Java_com_izplay_v3_player_MPVLib_nativeInitialize(JNIEnv*, jclass, jlong h) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
   return mpv_initialize(ctx->handle);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeTerminateDestroy(JNIEnv* env, jclass, jlong h) {
+Java_com_izplay_v3_player_MPVLib_nativeTerminateDestroy(JNIEnv* env, jclass, jlong h) {
   std::unique_ptr<MpvCtx> ctx;
   {
     std::lock_guard<std::mutex> guard(g_ctxMutex);
@@ -324,7 +324,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeTerminateDestroy(JNIEnv* 
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeErrorString(JNIEnv* env, jclass, jint code) {
+Java_com_izplay_v3_player_MPVLib_nativeErrorString(JNIEnv* env, jclass, jint code) {
   return env->NewStringUTF(mpv_error_string(code));
 }
 
@@ -333,7 +333,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeErrorString(JNIEnv* env, 
 // ---------------------------------------------------------------------------
 
 extern "C" JNIEXPORT void JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetEventListener(
+Java_com_izplay_v3_player_MPVLib_nativeSetEventListener(
     JNIEnv* env, jclass, jlong h, jobject listener) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return;
@@ -347,7 +347,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetEventListener(
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeRequestLogMessages(
+Java_com_izplay_v3_player_MPVLib_nativeRequestLogMessages(
     JNIEnv* env, jclass, jlong h, jstring jLevel) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
@@ -358,7 +358,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeRequestLogMessages(
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeObserveProperty(
+Java_com_izplay_v3_player_MPVLib_nativeObserveProperty(
     JNIEnv* env, jclass, jlong h, jlong replyId, jstring jName, jint format) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
@@ -371,7 +371,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeObserveProperty(
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeUnobserveProperty(
+Java_com_izplay_v3_player_MPVLib_nativeUnobserveProperty(
     JNIEnv*, jclass, jlong h, jlong replyId) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
@@ -383,7 +383,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeUnobserveProperty(
 // ---------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeCommand(
+Java_com_izplay_v3_player_MPVLib_nativeCommand(
     JNIEnv* env, jclass, jlong h, jobjectArray jArgs) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
@@ -407,7 +407,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeCommand(
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeCommandString(
+Java_com_izplay_v3_player_MPVLib_nativeCommandString(
     JNIEnv* env, jclass, jlong h, jstring jCmd) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
@@ -422,7 +422,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeCommandString(
 // ---------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetOptionString(
+Java_com_izplay_v3_player_MPVLib_nativeSetOptionString(
     JNIEnv* env, jclass, jlong h, jstring jName, jstring jValue) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
@@ -435,7 +435,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetOptionString(
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetPropertyString(
+Java_com_izplay_v3_player_MPVLib_nativeSetPropertyString(
     JNIEnv* env, jclass, jlong h, jstring jName, jstring jValue) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
@@ -448,7 +448,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetPropertyString(
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetPropertyDouble(
+Java_com_izplay_v3_player_MPVLib_nativeSetPropertyDouble(
     JNIEnv* env, jclass, jlong h, jstring jName, jdouble value) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
@@ -460,7 +460,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetPropertyDouble(
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetPropertyLong(
+Java_com_izplay_v3_player_MPVLib_nativeSetPropertyLong(
     JNIEnv* env, jclass, jlong h, jstring jName, jlong value) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
@@ -472,7 +472,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetPropertyLong(
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetPropertyBoolean(
+Java_com_izplay_v3_player_MPVLib_nativeSetPropertyBoolean(
     JNIEnv* env, jclass, jlong h, jstring jName, jboolean value) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
@@ -487,7 +487,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeSetPropertyBoolean(
 // caring whether mpv reported "property unavailable" vs a hard error.
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeGetPropertyString(
+Java_com_izplay_v3_player_MPVLib_nativeGetPropertyString(
     JNIEnv* env, jclass, jlong h, jstring jName) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return nullptr;
@@ -525,7 +525,7 @@ jobject boxBoolean(JNIEnv* env, bool v) {
 }  // namespace
 
 extern "C" JNIEXPORT jobject JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeGetPropertyDouble(
+Java_com_izplay_v3_player_MPVLib_nativeGetPropertyDouble(
     JNIEnv* env, jclass, jlong h, jstring jName) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return nullptr;
@@ -537,7 +537,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeGetPropertyDouble(
 }
 
 extern "C" JNIEXPORT jobject JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeGetPropertyLong(
+Java_com_izplay_v3_player_MPVLib_nativeGetPropertyLong(
     JNIEnv* env, jclass, jlong h, jstring jName) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return nullptr;
@@ -549,7 +549,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeGetPropertyLong(
 }
 
 extern "C" JNIEXPORT jobject JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeGetPropertyBoolean(
+Java_com_izplay_v3_player_MPVLib_nativeGetPropertyBoolean(
     JNIEnv* env, jclass, jlong h, jstring jName) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return nullptr;
@@ -576,7 +576,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeGetPropertyBoolean(
 // across threads) and hand mpv the global ref's raw address.
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeAttachSurface(
+Java_com_izplay_v3_player_MPVLib_nativeAttachSurface(
     JNIEnv* env, jclass, jlong h, jobject surface) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
@@ -614,7 +614,7 @@ Java_dev_android_anotheriptvplayer_player_MPVLib_nativeAttachSurface(
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_dev_android_anotheriptvplayer_player_MPVLib_nativeDetachSurface(
+Java_com_izplay_v3_player_MPVLib_nativeDetachSurface(
     JNIEnv* env, jclass, jlong h) {
   auto* ctx = lookupCtx(h);
   if (!ctx) return MPV_ERROR_INVALID_PARAMETER;
