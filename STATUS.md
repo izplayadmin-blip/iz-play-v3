@@ -48,6 +48,42 @@ Nada nesta categoria na Etapa 0.
 
 ## 🔴 Bloqueado
 
+### Bloqueio A — incompatibilidade de plataforma (novo, 2026-07-21)
+
+A instalação no único dispositivo disponível **falhou**:
+
+```
+INSTALL_FAILED_OLDER_SDK: Requires newer sdk version #26 (current version is #25)
+```
+
+| Dispositivo | `192.168.15.23:5555` |
+|---|---|
+| Fabricante / modelo | rockchip / MCD-121 (`rk322x_box`) |
+| Android anunciado | "11.1" |
+| **API real** | **25 (Android 7.1)** |
+| ABI | `armeabi-v7a` |
+| Características | `box` — **sem** `android.software.leanback` |
+
+Com `minSdk = 26` o IZ Play V3 não instala neste aparelho. **Todo o smoke test
+está bloqueado por esta causa**, antes mesmo da questão de credenciais:
+
+abertura · splash · cadastro de playlist · navegação · fechar e reabrir ·
+persistência · botão voltar · rotação/orientação · ausência de crash
+
+Observações do aparelho, sem nenhuma alteração feita nele:
+
+- `com.izplay.v3` **já estava instalado** (build anterior, `minSdk=24`,
+  instalado em 2026-07-21 09:54). Não foi desinstalado nem alterado.
+- `com.izplay.tv` (IZ Play V2, versão 2.1.11) está presente. Não foi tocado —
+  e confirma a necessidade do isolamento de banco/preferências feito em
+  `6dfa354`.
+
+**Decisão pendente do responsável:** manter `minSdk 26` e obter um dispositivo
+Android 8+ para validação, ou reavaliar a faixa de suporte em função da frota
+real de TV boxes. Registrado em `MIGRATION_PLAN.md`.
+
+### Bloqueio B — ausência de credenciais
+
 | Teste | Motivo do bloqueio |
 |---|---|
 | Cadastro de playlist Xtream | Sem credenciais de provedor autorizadas |
@@ -79,8 +115,8 @@ ambiente sobre o binário do V3. Por isso permanece bloqueado aqui.
 
 | Dispositivo | Estado |
 |---|---|
-| `192.168.15.23:5555` | conectado e autorizado — **nenhuma instalação feita**, aguardando autorização |
-| `ca1a4656` | `offline` |
+| `192.168.15.23:5555` — rockchip MCD-121 (`rk322x_box`), API 25, `armeabi-v7a` | conectado e autorizado — **instalação tentada e recusada** (`INSTALL_FAILED_OLDER_SDK`) |
+| `ca1a4656` | não aparece mais na lista |
 | Android TV / TV Box físico | não disponível nesta sessão |
 | Telas 720p / 1080p / 4K | não testadas |
 

@@ -114,4 +114,5 @@ infraestrutura embutidos.
 | 2026-07-21 | Base congelada em `f71a552` | Estabilidade; upstream não é sincronizado automaticamente |
 | 2026-07-21 | Player MPV mantido | Base validada pelo usuário; só a camada visual dos controles será redesenhada |
 | 2026-07-21 | "Login" = cadastro de credenciais do provedor | Sem conta IZ Play, sem backend de usuários, sem segundo sistema de autenticação |
+| 2026-07-21 | **`minSdk 26` em conflito com o hardware de teste** — pendente | O rk322x (MCD-121) anuncia Android "11.1" mas roda API 25. Com minSdk 26 o app não instala nele e a validação funcional fica sem dispositivo. Decidir entre: (a) voltar a minSdk 24 com desugaring e auditar as guardas de API 26+; (b) manter 26 e obter aparelho Android 8+; (c) manter 26 e reavaliar com dados da frota real. |
 | 2026-07-21 | Dois amarelos com papéis distintos | `#F5A623` destaque AO VIVO/HOT · `#F39C12` warning do sistema. Primária continua `#CC0000`. |
