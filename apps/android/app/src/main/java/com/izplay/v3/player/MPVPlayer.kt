@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.view.Surface
 import com.izplay.v3.R
+import com.izplay.v3.util.CredentialRedactor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -312,7 +313,7 @@ class MPVPlayer(context: Context) {
             // hands us its Surface. Without this guard `gpu-context=android`
             // fails VO init and we surface "cannot reach server" instead of
             // the real "no surface yet".
-            Log.i(TAG, "load() before surface ready — deferring url=$url")
+            Log.i(TAG, CredentialRedactor.redact("load() before surface ready — deferring url=$url"))
             pendingLoad = req
             return@onMpvQueue
         }
@@ -335,9 +336,14 @@ class MPVPlayer(context: Context) {
                 add("start=${req.startSeconds}")
             }
         }.toTypedArray()
-        Log.i(TAG, "loadfile args=${args.toList()}")
+        Log.i(TAG, CredentialRedactor.redact("loadfile args=${args.toList()}"))
         val rc = MPVLib.command(handle, args)
-        if (rc < 0) Log.w(TAG, "loadfile rc=$rc (${MPVLib.errorString(rc)}) args=${args.toList()}")
+        if (rc < 0) Log.w(
+            TAG,
+            CredentialRedactor.redact(
+                "loadfile rc=$rc (${MPVLib.errorString(rc)}) args=${args.toList()}",
+            ),
+        )
 
         if (req.play) setPaused(false)
         publishPlaybackState()
@@ -645,7 +651,7 @@ class MPVPlayer(context: Context) {
         // session shows the demuxer / VO / mediacodec story end-to-end. Worth
         // the verbosity during the IPTV bring-up; tighten back to "warn" once
         // the player is stable across providers.
-        val line = text.trimEnd('\n')
+        val line = CredentialRedactor.redact(text.trimEnd('\n'))
         when (level) {
             "fatal", "error" -> Log.e("mpv", "$prefix: $line")
             "warn"           -> Log.w("mpv", "$prefix: $line")
@@ -671,7 +677,10 @@ class MPVPlayer(context: Context) {
         if (_playbackFailureMessage.value == null) {
             _playbackFailureMessage.value = msg
         }
-        Log.i(TAG, "surfaced failure: [$level] $prefix: $text → $msg")
+        Log.i(
+            TAG,
+            CredentialRedactor.redact("surfaced failure: [$level] $prefix: $text → $msg"),
+        )
     }
 
     private fun shouldSurfaceLogAsPlaybackFailure(

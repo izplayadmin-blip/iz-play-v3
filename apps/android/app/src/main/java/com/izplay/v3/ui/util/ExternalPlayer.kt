@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import com.izplay.v3.R
+import com.izplay.v3.util.CredentialRedactor
 
 /**
  * Hands a playback URL off to whichever installed app declares it can play
@@ -29,6 +30,6 @@ fun launchExternalPlayer(context: Context, url: String) {
             context.getString(R.string.external_player_not_found),
             Toast.LENGTH_LONG,
         ).show()
-        Log.i("ExternalPlayer", "No video handler for $url")
+        Log.i("ExternalPlayer", CredentialRedactor.redact("No video handler for $url"))
     }
 }

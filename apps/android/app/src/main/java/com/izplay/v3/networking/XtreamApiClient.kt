@@ -2,6 +2,7 @@ package com.izplay.v3.networking
 
 import android.util.Log
 import com.izplay.v3.model.Playlist
+import com.izplay.v3.util.CredentialRedactor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
@@ -102,7 +103,7 @@ class XtreamApiClient(
         try {
             XtreamJson.decodeFromString(serializer, raw)
         } catch (e: Throwable) {
-            Log.w(TAG, "Decoding error for $url\nBody: $raw", e)
+            Log.w(TAG, CredentialRedactor.redact("Decoding error for $url\nBody: $raw"), e)
             throw XtreamException.Decoding(e)
         }
     }
