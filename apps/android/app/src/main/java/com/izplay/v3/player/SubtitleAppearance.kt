@@ -52,7 +52,7 @@ data class SubtitleAppearance(
 class SubtitleAppearanceStore(context: Context) {
 
     private val prefs = context.applicationContext
-        .getSharedPreferences("playback", Context.MODE_PRIVATE)
+        .getSharedPreferences("izplay_v3_playback", Context.MODE_PRIVATE)
 
     fun load(): SubtitleAppearance {
         val raw = prefs.getString(KEY, null) ?: return SubtitleAppearance().clamp()

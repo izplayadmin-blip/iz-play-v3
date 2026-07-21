@@ -38,7 +38,7 @@ class DownloadManager(
     private val workManager get() = WorkManager.getInstance(context.applicationContext)
 
     private val prefs by lazy {
-        context.applicationContext.getSharedPreferences("downloads", Context.MODE_PRIVATE)
+        context.applicationContext.getSharedPreferences("izplay_v3_downloads", Context.MODE_PRIVATE)
     }
 
     var wifiOnly: Boolean

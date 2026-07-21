@@ -53,7 +53,7 @@ class RatingManager(context: Context) {
     }
 
     companion object {
-        private const val PREFS_NAME = "rating"
+        private const val PREFS_NAME = "izplay_v3_rating"
         private const val KEY_COUNT = "successfulSessionCount"
         private const val KEY_LAST_VERSION = "lastPromptVersion"
         private const val KEY_LAST_PROMPT = "lastPromptDateMs"

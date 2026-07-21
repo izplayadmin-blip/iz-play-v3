@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.map
 class HiddenCategoryStore(context: Context) {
 
     private val prefs = context.applicationContext.getSharedPreferences(
-        "hidden_categories",
+        "izplay_v3_hidden_categories",
         Context.MODE_PRIVATE,
     )
 

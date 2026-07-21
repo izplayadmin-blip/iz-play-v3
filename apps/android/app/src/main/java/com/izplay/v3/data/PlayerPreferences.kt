@@ -51,7 +51,7 @@ class PlayerPreferences(context: Context) {
     }
 
     companion object {
-        private const val PREFS_NAME = "player"
+        private const val PREFS_NAME = "izplay_v3_player"
         private const val KEY_PIP = "pipEnabled"
         private const val KEY_BG_PLAY = "continuePlayingInBackground"
         private const val KEY_LONG_PRESS_SPEED = "speedUpOnLongPress"

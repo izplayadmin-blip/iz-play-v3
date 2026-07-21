@@ -31,7 +31,7 @@ class LastPlaylistStore(context: Context) {
     }
 
     companion object {
-        private const val PREFS_NAME = "session"
+        private const val PREFS_NAME = "izplay_v3_session"
         private const val KEY = "lastPlaylistId"
     }
 }
