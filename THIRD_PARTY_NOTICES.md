@@ -129,8 +129,11 @@ obrigação adicional.
 
 ## Assets visuais
 
-Nenhum asset de terceiros foi incorporado até aqui. Os ícones atuais são o
-adaptive icon genérico do template do Android Studio.
+Incorporados em 2026-07-22, vindos do IZ Play V2 (projeto do mesmo titular),
+indicados como oficiais pelo responsável pela marca: logo "iZ PLAY"
+(`izplay_logo.png`), símbolo do ícone (`ic_izplay_foreground.png` + mipmaps
+derivados) e banner de Android TV (`tv_banner.png`). Registro de origem em
+`LICENSES.md`.
 
 Assets do IZ Play V2 candidatos a uso (logo, banner de TV, ícones) estão
 **pendentes de auditoria de autoria** — ver `LICENSES.md`, seção 3.

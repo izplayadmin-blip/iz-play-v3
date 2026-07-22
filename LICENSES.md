@@ -67,14 +67,22 @@ internamente. Antes de reutilizar qualquer asset, fonte, ícone ou dependência,
 verificar autoria, origem, licença, permissão de distribuição e obrigação de
 atribuição.
 
-**Auditoria pendente** — os clones foram rasos (`--depth 1`), o que impede
-rastrear autoria pelo histórico. Itens a auditar antes do uso:
+**Assets incorporados ao V3 em 2026-07-22**, por instrução direta do
+responsável pela marca (proprietário dos repositórios IZ Play), que os indicou
+como assets oficiais e autorizou o uso:
+
+| Asset | Origem (local `iz-play-v2.1`) | Destino no V3 |
+|---|---|---|
+| `izplay_logo_login.png` (420×141) | `android/.../drawable/` | `drawable-nodpi/izplay_logo.png` |
+| `ic_launcher_foreground.png` (432×432) | `android/.../drawable/` | `drawable-nodpi/ic_izplay_foreground.png` + mipmaps gerados (48–192px) |
+| `tv_banner.png` (320×180) | `android/.../drawable/` | `drawable-nodpi/tv_banner.png` |
+
+A confirmação formal de autoria/cadeia de origem desses arquivos permanece
+recomendada antes da publicação nas lojas (ver observação acima). Nenhum outro
+asset foi importado.
 
 | Asset | Situação |
 |---|---|
-| `tv_banner.png` (320×180) | autoria a confirmar |
-| `izplay_logo_login.png` (420×141) | autoria a confirmar |
-| `ic_launcher_foreground.png` (432×432) e mipmaps | autoria a confirmar |
 | Fonte **Inter** | referenciada por nome; nenhum arquivo de fonte no repo. Se empacotada no Android, é SIL OFL 1.1 e exige aviso — ver `THIRD_PARTY_NOTICES.md` |
 
 Tokens numéricos (cores, espaçamentos, raios, durações) não são obra protegível
