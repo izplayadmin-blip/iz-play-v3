@@ -607,19 +607,11 @@ private fun EmptyTab(message: String) {
 
 @Composable
 private fun LoadingState(modifier: Modifier = Modifier, message: String?) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator()
-            if (!message.isNullOrEmpty()) {
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
+    // Tela de espera da marca (fiel ao LoadingScreen do V2 Android).
+    com.izplay.v3.ui.design.components.IzLoadingScreen(
+        modifier = modifier,
+        message = message,
+    )
 }
 
 @Composable
