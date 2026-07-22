@@ -39,9 +39,11 @@ import com.izplay.v3.ui.player.PlayerScreen
 import com.izplay.v3.ui.player.PlayerViewModel
 import com.izplay.v3.ui.playlist.AddXtreamPlaylistScreen
 import com.izplay.v3.ui.playlist.PlaylistScreen
+import com.izplay.v3.ui.splash.SplashScreen
 
 /** Route names for the app's navigation graph. */
 private object Routes {
+    const val SPLASH = "splash"
     const val PLAYLISTS = "playlists"
     const val ADD_XTREAM = "add_xtream"
     const val ADD_M3U = "add_m3u"
@@ -118,37 +120,46 @@ fun AppNavigation() {
     val playlistRepository = LocalPlaylistRepository.current
     val scope = rememberCoroutineScope()
 
-    // Mirrors iOS `hasAttemptedAutoLoad`: try once per process to resume the
-    // last opened playlist. If the saved id is missing from the DB, silently
-    // drop it so the next launch starts at the list rather than retrying.
-    var hasAttemptedAutoLoad by rememberSaveable { mutableStateOf(false) }
+    // Observed once per process to decide, at the Splash, whether to resume the
+    // last opened playlist. Collected here so the Splash gate can read it.
     val playlists by playlistRepository.observeAll().collectAsState(initial = null)
-    LaunchedEffect(playlists, hasAttemptedAutoLoad) {
-        val list = playlists ?: return@LaunchedEffect
-        if (hasAttemptedAutoLoad) return@LaunchedEffect
-        hasAttemptedAutoLoad = true
-        val savedId = lastPlaylistStore.read() ?: return@LaunchedEffect
-        val match = list.firstOrNull { it.id == savedId }
-        if (match == null) {
-            lastPlaylistStore.clear()
-            return@LaunchedEffect
-        }
-        navController.navigate(Routes.dashboard(savedId)) {
-            popUpTo(Routes.PLAYLISTS) { inclusive = false }
-            launchSingleTop = true
-        }
-    }
+    // Guards the one-time resume decision made while the Splash is showing.
+    var hasAttemptedAutoLoad by rememberSaveable { mutableStateOf(false) }
 
     // Short fade for every nav transition — keeps the NavHost crossfade brief
     // so the modal slide-up driven by ModalSlideContainer is what the user sees.
     NavHost(
         navController = navController,
-        startDestination = Routes.PLAYLISTS,
+        startDestination = Routes.SPLASH,
         enterTransition = { fadeIn(tween(120)) },
         exitTransition = { fadeOut(tween(120)) },
         popEnterTransition = { fadeIn(tween(120)) },
         popExitTransition = { fadeOut(tween(120)) },
     ) {
+        composable(route = Routes.SPLASH) {
+            // Marca IZ Play na abertura. A Splash segura até (a) a animação
+            // terminar e (b) as playlists carregarem do banco; então roteia
+            // UMA vez, direto para o destino certo — sem flash da lista vazia.
+            // A regra de retomada é a mesma de antes (id salvo casa com a
+            // lista → dashboard; senão → lista; id órfão é limpo).
+            var animationDone by remember { mutableStateOf(false) }
+            SplashScreen(onAnimationEnd = { animationDone = true })
+            LaunchedEffect(animationDone, playlists, hasAttemptedAutoLoad) {
+                if (hasAttemptedAutoLoad) return@LaunchedEffect
+                if (!animationDone) return@LaunchedEffect
+                val list = playlists ?: return@LaunchedEffect
+                hasAttemptedAutoLoad = true
+                val savedId = lastPlaylistStore.read()
+                val match = savedId?.let { id -> list.firstOrNull { it.id == id } }
+                if (savedId != null && match == null) lastPlaylistStore.clear()
+                val target =
+                    if (match != null) Routes.dashboard(match.id) else Routes.PLAYLISTS
+                navController.navigate(target) {
+                    popUpTo(Routes.SPLASH) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        }
         composable(route = Routes.PLAYLISTS) {
             PlaylistScreen(
                 onAddXtream = { navController.navigate(Routes.xtream()) },

@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.IZPlay" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.IZPlay" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Fundo preto da janela: elimina o flash branco antes de o Compose
+             desenhar a Splash da marca no arranque. O conteúdo Compose de cada
+             tela preenche a janela por cima, então isto só aparece nos poucos
+             frames iniciais. -->
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
 </resources>
