@@ -6,6 +6,34 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
 ## [Não publicado] — branch `codex/v3-bootstrap`
 
+### Etapa 2 — Design system IZ Play V3 · 2026-07-22
+
+#### Adicionado
+
+- Tokens da marca em `ui/design/tokens/` — cores (incluindo os dois amarelos
+  com papéis fixos: `#F5A623` AO VIVO/HOT, `#F39C12` alerta; primária `#CC0000`),
+  espaçamento, raios, elevação, bordas, dimensões, tipografia, gradientes,
+  durações, escalas de foco e opacidades — `feat(theme)`
+- `IzTheme` — tema Material 3 dark isolado, derivado dos tokens (não substitui o
+  tema das telas funcionais) — `feat(theme)`
+- `izFocusVisuals` — realce de foco de TV (escala animada + borda vermelha),
+  lendo a interaction source do próprio item — `feat(tv)`
+- 14 componentes `Iz*` em `ui/design/components/`: `IzButton`, `IzBadge`,
+  `IzProgressBar`, `IzLoading`/`IzShimmerBox`, `IzEmptyState`, `IzErrorState`,
+  `IzDialog`, `IzTvCard`, `IzPosterCard`, `IzChannelCard`, `IzContentRow`,
+  `IzHero`, `IzSidebar`, `IzNavigationItem` — cada um com `@Preview` — `feat(ui)`
+- Galeria de inspeção **debug-only** (`IzGalleryActivity`) para render e teste de
+  foco em dispositivo real; não entra em release — `feat(ui)`
+
+#### Verificado
+
+- `assembleDebug` verde, `testDebugUnitTest` 4/4 verde
+- Lint: **os mesmos 5 erros herdados**, zero novo, zero em `ui/design`, zero `NewApi`
+- Render real no rk322x (API 25): identidade IZ Play correta (fundo preto,
+  primária vermelha, dois amarelos distintos), foco de TV com borda vermelha
+  confirmado no botão secundário
+- **Nenhuma tela funcional alterada**; nenhuma dependência nova; `minSdk 24` mantido
+
 ### minSdk 24 + smoke test no dispositivo · 2026-07-21
 
 #### Alterado

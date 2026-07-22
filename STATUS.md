@@ -44,7 +44,9 @@ Nada nesta categoria na Etapa 0.
 
 ## ⏳ Pendente
 
-- Design system IZ Play V3 (Etapa 2)
+- ~~Design system IZ Play V3 (Etapa 2)~~ ✅ concluído 2026-07-22 (tokens + 14
+  componentes `Iz*` isolados em `ui/design`, com galeria debug e foco de TV
+  verificado em dispositivo real). Ver `DESIGN_SYSTEM.md`.
 - Splash, sidebar, Home, migração visual das telas (Etapa 3)
 - Suporte a Android TV: `LEANBACK_LAUNCHER`, banner, D-pad, foco (Etapa 4)
 - Ícone e banner próprios — hoje o app ainda usa o adaptive icon genérico do template

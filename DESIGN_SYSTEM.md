@@ -7,8 +7,9 @@ contém a especificação escrita e os tokens oficiais.
 Qualidade de composição inspirada conceitualmente no Streamix Android — **sem
 copiar código**, ver `LICENSES.md`.
 
-> Status: **especificação**. Os componentes ainda não foram implementados; isso
-> é a Etapa 2. Este documento é o contrato que a implementação deve seguir.
+> Status: **implementado (Etapa 2)**. Os tokens e os 14 componentes existem em
+> `com.izplay.v3.ui.design`, isolados das telas funcionais. Este documento
+> continua sendo o contrato; a seção final lista onde cada peça mora no código.
 
 ---
 
@@ -173,3 +174,42 @@ Sem dados falsos em produção. Não havendo curadoria editorial no servidor, as
 fileiras usam regras locais simples, determinísticas e documentadas, baseadas
 em: conteúdo recente, mais acessado localmente, metadados mais completos,
 favoritos, histórico e conteúdo não concluído.
+
+---
+
+## Implementação (Etapa 2)
+
+Pacote raiz: `com.izplay.v3.ui.design` — **isolado**. Não substitui o
+`ui/theme/IZPlayTheme` que as telas funcionais herdadas usam; a troca do tema
+das telas reais acontece tela a tela na Etapa 3.
+
+| Arquivo | Conteúdo |
+|---|---|
+| `tokens/IzColor.kt` | cores da marca + os dois amarelos (`Live` / `Warning`) |
+| `tokens/IzDimens.kt` | `IzSpacing`, `IzRadius`, `IzElevation`, `IzBorder`, `IzSize` |
+| `tokens/IzMotion.kt` | durações, `IzFocusScale`, `IzOpacity` |
+| `tokens/IzType.kt` | escala tipográfica (Inter → fonte do sistema por ora) |
+| `tokens/IzGradient.kt` | scrims do Hero e placeholder |
+| `IzTheme.kt` | tema Material 3 dark derivado dos tokens (para previews) |
+| `focus/IzFocus.kt` | `izFocusVisuals` — escala + borda vermelha no foco de TV |
+| `components/*.kt` | os 14 componentes `Iz*` |
+
+Cada componente traz um `@Preview`. Uma galeria de inspeção existe **apenas no
+source set `debug`** (`debug/.../IzGalleryActivity.kt`, não entra em release),
+iniciável por `adb shell am start -n com.izplay.v3/.debug.IzGalleryActivity`.
+
+### Estado do foco de TV
+
+`izFocusVisuals` aplica escala animada (150ms) + borda vermelha de 2dp ao foco,
+lendo a `MutableInteractionSource` do próprio item. Verificado em dispositivo
+real (rk322x, API 25): o botão secundário focado exibe a borda vermelha e a
+escala. Observação: a borda vermelha sobre o botão **primário** (também
+vermelho) tem baixo contraste — para o primário, o realce de foco confia na
+escala; avaliar um anel de foco claro para o primário na Etapa 3/4.
+
+### Pendências herdadas da spec para a Etapa 3
+
+- Parâmetros do carrossel do Hero (nº de itens, rotação, indicadores,
+  pré-carregamento, comportamento em pouca memória) — resolver ao montar a Home.
+- Empacotar a fonte Inter (obrigação SIL OFL — ver `THIRD_PARTY_NOTICES.md`) ou
+  manter a fonte do sistema.
