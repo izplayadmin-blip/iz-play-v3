@@ -56,6 +56,32 @@ import com.izplay.v3.ui.components.ModalSlideContainer
 import com.izplay.v3.ui.components.SavingOverlay
 import com.izplay.v3.ui.components.SectionHeader
 import com.izplay.v3.ui.design.IzTheme
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import com.izplay.v3.ui.design.focus.IzFocusRing
+import com.izplay.v3.ui.design.focus.izFocusVisuals
+import com.izplay.v3.ui.design.focus.rememberIzInteractionSource
+import com.izplay.v3.ui.design.tokens.IzColor
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -186,118 +212,108 @@ fun AddXtreamPlaylistScreen(
         }
     }
 
+    // ===== Apresentação: login fiel ao SetupScreen do IZ Play V2 Android =====
     ModalSlideContainer {
         IzTheme {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(if (editing != null) "Edit Xtream Playlist" else "New Xtream Playlist")
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onCancel, enabled = !isSaving) {
-                            Icon(Icons.Default.Close, contentDescription = "Cancel")
-                        }
-                    },
-                    actions = {
-                        TextButton(onClick = ::save, enabled = isValid && !isSaving) {
-                            Text("Save")
-                        }
-                    },
-                )
-            },
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(
+                    // Pré-mesclado: RedDeep@34% sobre preto ≈ #1E0000. Cores
+                    // opacas evitam o banding claro que o alpha em gradiente
+                    // produz em GPUs de TV box fracas.
+                    Brush.linearGradient(
+                        listOf(Color.Black, Color(0xFF1E0000), IzColor.Background, Color.Black),
+                    ),
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            IconButton(
+                onClick = onCancel,
+                enabled = !isSaving,
+                modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
             ) {
-                SectionHeader("Playlist Info")
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Name") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
-                        imeAction = ImeAction.Next,
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) },
-                    ),
-                )
-                OutlinedTextField(
-                    value = serverUrl,
-                    onValueChange = { serverUrl = it },
-                    label = { Text("Server URL") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Uri,
-                        imeAction = ImeAction.Next,
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) },
-                    ),
+                Icon(Icons.Default.Close, contentDescription = "Cancel", tint = IzColor.TextSecondary)
+            }
+
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 72.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Column(Modifier.weight(0.9f), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(
+                        painter = painterResource(com.izplay.v3.R.drawable.izplay_logo),
+                        contentDescription = "IZ Play",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxWidth(0.68f),
+                    )
+                    Spacer(Modifier.height(22.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            "ENTRETENIMENTO",
+                            color = IzColor.TextPrimary,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 15.sp,
+                            letterSpacing = 6.sp,
+                        )
+                        Text(
+                            "SEM LIMITES",
+                            color = IzColor.Primary,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 15.sp,
+                            letterSpacing = 6.sp,
+                        )
+                    }
+                }
+
+                Box(
+                    Modifier
+                        .width(2.dp)
+                        .height(520.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color.Transparent, IzColor.Primary, Color.Transparent),
+                            ),
+                        ),
                 )
 
-                Spacer(Modifier.height(4.dp))
-                SectionHeader("Credentials")
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Username") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) },
-                    ),
-                )
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Password") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = if (passwordVisible) {
-                        VisualTransformation.None
-                    } else {
-                        PasswordVisualTransformation()
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done,
-                    ),
-                    keyboardActions = KeyboardActions(onDone = { save() }),
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                imageVector = if (passwordVisible) {
-                                    Icons.Default.VisibilityOff
-                                } else {
-                                    Icons.Default.Visibility
-                                },
-                                contentDescription = if (passwordVisible) {
-                                    "Hide password"
-                                } else {
-                                    "Show password"
-                                },
-                            )
-                        }
-                    },
-                )
-
-                Spacer(Modifier.height(4.dp))
-                SectionHeader("Content Settings")
-                AdultContentToggle(
-                    checked = filterAdultContent,
-                    onCheckedChange = { filterAdultContent = it },
-                )
+                Column(
+                    Modifier
+                        .width(480.dp)
+                        .padding(start = 70.dp),
+                ) {
+                    if (editing != null) {
+                        Text(
+                            "EDITAR PLAYLIST XTREAM",
+                            color = IzColor.TextSecondary,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 12.sp,
+                            letterSpacing = 3.sp,
+                        )
+                        Spacer(Modifier.height(14.dp))
+                    }
+                    IzLoginField("Servidor (http://...)", serverUrl, Icons.Filled.Storage) { serverUrl = it }
+                    Spacer(Modifier.height(18.dp))
+                    IzLoginField("Usuario", username, Icons.Filled.Person) { username = it }
+                    Spacer(Modifier.height(18.dp))
+                    IzLoginField(
+                        "Senha",
+                        password,
+                        Icons.Filled.Lock,
+                        isPassword = true,
+                        passVisible = passwordVisible,
+                        onTogglePass = { passwordVisible = !passwordVisible },
+                    ) { password = it }
+                    Spacer(Modifier.height(18.dp))
+                    IzLoginField("Nome da lista", name, Icons.AutoMirrored.Filled.Label) { name = it }
+                    Spacer(Modifier.height(22.dp))
+                    IzEntrarButton(enabled = isValid && !isSaving, onClick = ::save)
+                    Spacer(Modifier.height(18.dp))
+                    AdultContentToggle(checked = filterAdultContent, onCheckedChange = { filterAdultContent = it })
+                }
             }
         }
 
@@ -318,6 +334,111 @@ fun AddXtreamPlaylistScreen(
             )
         }
         }
+    }
+}
+
+/** Campo de login no estilo do SetupScreen do V2 (66dp, raio 12, fundo translúcido). */
+@Composable
+private fun IzLoginField(
+    placeholder: String,
+    value: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isPassword: Boolean = false,
+    passVisible: Boolean = false,
+    onTogglePass: (() -> Unit)? = null,
+    onChange: (String) -> Unit,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(66.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xCC181A1E))
+            .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(icon, null, tint = IzColor.TextSecondary, modifier = Modifier.size(22.dp))
+        Spacer(Modifier.width(12.dp))
+        BasicTextField(
+            value = value,
+            onValueChange = onChange,
+            singleLine = true,
+            textStyle = TextStyle(
+                color = IzColor.TextPrimary,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+            ),
+            cursorBrush = SolidColor(IzColor.Primary),
+            visualTransformation = if (isPassword && !passVisible) {
+                PasswordVisualTransformation()
+            } else {
+                VisualTransformation.None
+            },
+            decorationBox = { inner ->
+                if (value.isEmpty()) Text(placeholder, color = IzColor.TextSecondary, fontSize = 16.sp)
+                inner()
+            },
+            modifier = Modifier.weight(1f),
+        )
+        if (isPassword && onTogglePass != null) {
+            val eye = rememberIzInteractionSource()
+            val eyeFocused by eye.collectIsFocusedAsState()
+            Box(
+                Modifier
+                    .size(34.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (eyeFocused) IzColor.Primary else Color.Transparent)
+                    .clickable(interactionSource = eye, indication = null) { onTogglePass() },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    if (passVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                    contentDescription = "Mostrar senha",
+                    tint = if (eyeFocused) Color.White else IzColor.TextSecondary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+        }
+    }
+}
+
+/** Botão ENTRAR do V2: 64dp, gradiente vermelho, foco = anel branco + zoom leve. */
+@Composable
+private fun IzEntrarButton(enabled: Boolean, onClick: () -> Unit) {
+    val interaction = rememberIzInteractionSource()
+    val shape = RoundedCornerShape(12.dp)
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .izFocusVisuals(interaction, shape = shape, focusedScale = 1.02f, ring = IzFocusRing.OnPrimary)
+            .clip(shape)
+            .background(
+                if (enabled) {
+                    Brush.verticalGradient(listOf(Color(0xFFE8222C), Color(0xFFC8121B)))
+                } else {
+                    Brush.verticalGradient(listOf(IzColor.RedDark, IzColor.RedDark))
+                },
+            )
+            .clickable(interactionSource = interaction, indication = null, enabled = enabled, onClick = onClick),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            "ENTRAR",
+            color = IzColor.TextPrimary,
+            fontWeight = FontWeight.Black,
+            fontSize = 19.sp,
+            letterSpacing = 1.sp,
+        )
+        Spacer(Modifier.width(14.dp))
+        Icon(
+            Icons.AutoMirrored.Filled.ArrowForward,
+            null,
+            tint = IzColor.TextPrimary,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }
 
