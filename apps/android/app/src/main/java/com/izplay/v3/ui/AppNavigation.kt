@@ -152,11 +152,18 @@ fun AppNavigation() {
                 val savedId = lastPlaylistStore.read()
                 val match = savedId?.let { id -> list.firstOrNull { it.id == id } }
                 if (savedId != null && match == null) lastPlaylistStore.clear()
-                val target =
-                    if (match != null) Routes.dashboard(match.id) else Routes.PLAYLISTS
-                navController.navigate(target) {
+                // A lista de playlists fica SEMPRE na base da pilha — igual ao
+                // comportamento original do Another: voltar do dashboard leva à
+                // lista, não para fora do app. As duas navegações ocorrem no
+                // mesmo frame, então a lista não chega a aparecer.
+                navController.navigate(Routes.PLAYLISTS) {
                     popUpTo(Routes.SPLASH) { inclusive = true }
                     launchSingleTop = true
+                }
+                if (match != null) {
+                    navController.navigate(Routes.dashboard(match.id)) {
+                        launchSingleTop = true
+                    }
                 }
             }
         }

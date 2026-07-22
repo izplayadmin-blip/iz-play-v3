@@ -59,7 +59,16 @@ import com.izplay.v3.data.local.VodStreamWithCategory
 import com.izplay.v3.model.Playlist
 import com.izplay.v3.ui.LocalPlaylistContentStore
 import com.izplay.v3.ui.LocalPlaylistRepository
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import com.izplay.v3.ui.design.IzTheme
+import com.izplay.v3.ui.design.components.IzNavDestination
+import com.izplay.v3.ui.design.components.IzSidebar
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 /**
  * Top-level catalog screen for a playlist — three tabs (Live TV, Movies,
@@ -116,13 +125,72 @@ fun PlaylistDashboardScreen(
     val vodByCategory by store.vodStreamsByCategoryId.collectAsStateWithLifecycle()
     val seriesByCategory by store.seriesItemsByCategoryId.collectAsStateWithLifecycle()
 
-    val pagerState = rememberPagerState(initialPage = 0) { TAB_COUNT }
+    // A Home (Início) é a página inicial — layout IZ Play aprovado.
+    val pagerState = rememberPagerState(initialPage = PAGE_HOME) { TAB_COUNT }
     // Picker sheet — opened from the list icon on content tabs. Holds the
     // type ("live" / "vod" / "series") of the active tab so the sheet's
     // hide/unhide writes the right namespace.
     val pickerSheetState = rememberModalBottomSheetState()
     var pickerType by remember { mutableStateOf<String?>(null) }
 
+    // Relógio real da sidebar (V2 mostra HH:mm na base da faixa vermelha).
+    var clock by remember { mutableStateOf(clockNow()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            clock = clockNow()
+            delay(30_000)
+        }
+    }
+
+    IzTheme {
+    Row(Modifier.fillMaxSize()) {
+    IzSidebar(
+        destinations = listOf(
+            IzNavDestination("home", stringResource(com.izplay.v3.R.string.screen_home), Icons.Default.Home),
+            IzNavDestination("favorites", stringResource(com.izplay.v3.R.string.screen_favorites), Icons.Default.Favorite),
+            IzNavDestination("live", stringResource(com.izplay.v3.R.string.screen_live_tv), Icons.Default.LiveTv),
+            IzNavDestination("movies", stringResource(com.izplay.v3.R.string.screen_movies), Icons.Default.Movie),
+            IzNavDestination("series", stringResource(com.izplay.v3.R.string.screen_series), Icons.Default.Tv),
+        ),
+        bottomDestinations = listOf(
+            IzNavDestination("settings", stringResource(com.izplay.v3.R.string.screen_settings), Icons.Default.Settings),
+            IzNavDestination("search", stringResource(com.izplay.v3.R.string.screen_search), Icons.Default.Search),
+        ),
+        selectedKey = when (pagerState.currentPage) {
+            PAGE_HOME -> "home"
+            0 -> "live"
+            1 -> "movies"
+            2 -> "series"
+            3 -> "settings"
+            else -> "search"
+        },
+        clock = clock,
+        onSelect = { key ->
+            when (key) {
+                // Favoritos abre a tela existente; o tipo segue a aba de
+                // conteúdo ativa (comportamento da estrela da top bar) e cai
+                // em "live" quando se está na Home/Configuração/Busca.
+                "favorites" -> onOpenFavorites(
+                    if (pagerState.currentPage < CONTENT_TAB_LIMIT) {
+                        tabTypeFor(pagerState.currentPage)
+                    } else {
+                        "live"
+                    },
+                )
+                else -> {
+                    val target = when (key) {
+                        "home" -> PAGE_HOME
+                        "live" -> 0
+                        "movies" -> 1
+                        "series" -> 2
+                        "settings" -> 3
+                        else -> 4
+                    }
+                    scope.launch { pagerState.animateScrollToPage(target) }
+                }
+            }
+        },
+    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -176,14 +244,6 @@ fun PlaylistDashboardScreen(
                             Icon(Icons.Default.Refresh, contentDescription = "Yenile")
                         }
                     }
-                },
-            )
-        },
-        bottomBar = {
-            DashboardBottomBar(
-                currentPage = pagerState.currentPage,
-                onSelect = { index ->
-                    scope.launch { pagerState.animateScrollToPage(index) }
                 },
             )
         },
@@ -264,6 +324,12 @@ fun PlaylistDashboardScreen(
                             onPlayLive = onPlayLive,
                             modifier = Modifier.fillMaxSize(),
                         )
+                        PAGE_HOME -> IzHomeBody(
+                            playlistId = playlistId,
+                            onOpenMovie = onOpenMovie,
+                            onResumeEpisode = onResumeEpisode,
+                            onPlayLive = onPlayLive,
+                        )
                     }
                 }
         }
@@ -296,9 +362,18 @@ fun PlaylistDashboardScreen(
             onDismiss = { pickerType = null },
         )
     }
+    } // Row (sidebar + conteúdo)
+    } // IzTheme
 }
 
-private const val TAB_COUNT = 5
+/** Página da Home (Início) no pager — depois das abas herdadas. */
+private const val PAGE_HOME = 5
+private const val TAB_COUNT = 6
+
+/** Relógio HH:mm da sidebar (java.time coberto pelo desugaring no API 24/25). */
+private fun clockNow(): String =
+    LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
+
 // Tab titles resolved via stringResource at compose time — see TAB_TITLE_IDS.
 private val TAB_TITLE_IDS = intArrayOf(
     com.izplay.v3.R.string.screen_live_tv,
@@ -306,6 +381,7 @@ private val TAB_TITLE_IDS = intArrayOf(
     com.izplay.v3.R.string.screen_series,
     com.izplay.v3.R.string.screen_settings,
     com.izplay.v3.R.string.screen_search,
+    com.izplay.v3.R.string.screen_home,
 )
 // Settings (3) and Search (4) hide the content-tab top-bar actions.
 private const val CONTENT_TAB_LIMIT = 3
@@ -327,56 +403,8 @@ private fun pickerTitleFor(type: String): String = stringResource(
     },
 )
 
-@Composable
-private fun DashboardBottomBar(currentPage: Int, onSelect: (Int) -> Unit) {
-    NavigationBar {
-        DashboardTab(
-            selected = currentPage == 0,
-            icon = Icons.Default.LiveTv,
-            label = stringResource(com.izplay.v3.R.string.screen_live_tv),
-            onClick = { onSelect(0) },
-        )
-        DashboardTab(
-            selected = currentPage == 1,
-            icon = Icons.Default.Movie,
-            label = stringResource(com.izplay.v3.R.string.screen_movies),
-            onClick = { onSelect(1) },
-        )
-        DashboardTab(
-            selected = currentPage == 2,
-            icon = Icons.Default.Tv,
-            label = stringResource(com.izplay.v3.R.string.screen_series),
-            onClick = { onSelect(2) },
-        )
-        DashboardTab(
-            selected = currentPage == 3,
-            icon = Icons.Default.Settings,
-            label = stringResource(com.izplay.v3.R.string.screen_settings),
-            onClick = { onSelect(3) },
-        )
-        DashboardTab(
-            selected = currentPage == 4,
-            icon = Icons.Default.Search,
-            label = stringResource(com.izplay.v3.R.string.screen_search),
-            onClick = { onSelect(4) },
-        )
-    }
-}
-
-@Composable
-private fun androidx.compose.foundation.layout.RowScope.DashboardTab(
-    selected: Boolean,
-    icon: ImageVector,
-    label: String,
-    onClick: () -> Unit,
-) {
-    NavigationBarItem(
-        selected = selected,
-        onClick = onClick,
-        icon = { Icon(icon, contentDescription = null) },
-        label = { Text(label) },
-    )
-}
+// A bottom bar herdada do Another foi substituída pela IzSidebar vermelha
+// (layout IZ Play aprovado). A navegação continua sendo o mesmo pager.
 
 // ---- Tab bodies ----
 

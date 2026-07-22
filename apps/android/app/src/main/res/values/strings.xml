@@ -20,6 +20,7 @@
 
     <!-- Screen titles -->
     <string name="screen_playlists">Playlists</string>
+    <string name="screen_home">Home</string>
     <string name="screen_live_tv">Live TV</string>
     <string name="screen_movies">Movies</string>
     <string name="screen_series">Series</string>

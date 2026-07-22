@@ -20,6 +20,7 @@
 
     <!-- Screen titles -->
     <string name="screen_playlists">Playlistler</string>
+    <string name="screen_home">Ana sayfa</string>
     <string name="screen_live_tv">Canlı TV</string>
     <string name="screen_movies">Filmler</string>
     <string name="screen_series">Diziler</string>
