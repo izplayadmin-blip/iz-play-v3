@@ -72,7 +72,8 @@ class IzGalleryActivity : ComponentActivity() {
                     IzSidebar(
                         destinations = Destinations,
                         selectedKey = "live",
-                        expanded = true,
+                        expandedOverride = true,
+                        clock = "10:00",
                         onSelect = {},
                     )
                     Column(

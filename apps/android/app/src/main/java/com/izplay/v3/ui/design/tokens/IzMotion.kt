@@ -8,7 +8,12 @@ object IzMotion {
     // Durações (ms)
     const val Fast = 150
     const val Normal = 200
-    const val Sidebar = 250
+
+    /** Recolher/expandir da sidebar — 180ms, valor do V2 Android (Sidebar.kt). */
+    const val Sidebar = 180
+
+    /** Foco de item da sidebar — 130ms (V2 Android). */
+    const val SidebarFocus = 130
     const val Max = 300
 }
 
@@ -25,8 +30,8 @@ object IzFocusScale {
     /** Botão focado. */
     const val Button = 1.03f
 
-    /** Item de sidebar focado. */
-    const val Sidebar = 1.02f
+    /** Item de sidebar focado — 1.08 no código Android do V2 (NavIcon). */
+    const val Sidebar = 1.08f
 }
 
 /** Opacidades de estado. */

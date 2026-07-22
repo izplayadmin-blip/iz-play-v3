@@ -53,12 +53,16 @@ object IzBorder {
     val hairline = 1.dp
 }
 
-/** Dimensões fixas de layout definidas na spec do V2. */
+/** Dimensões fixas de layout — valores do código Android do V2 (Sidebar.kt). */
 object IzSize {
-    // Sidebar (design-system/components/sidebar.md)
-    val sidebarExpanded = 240.dp
-    val sidebarCollapsed = 72.dp
-    val sidebarPadding = 24.dp
+    // Sidebar: parâmetros reais do IZ Play V2 Android
+    val sidebarExpanded = 214.dp
+    val sidebarCollapsed = 78.dp
+    val sidebarLogoArea = 82.dp
+    val sidebarItemHeight = 54.dp
+    val sidebarItemExpanded = 188.dp
+    val sidebarItemCollapsed = 62.dp
+    val sidebarIcon = 28.dp
 
     // Hero (design-system/components/hero.md)
     val heroHeight = 320.dp
