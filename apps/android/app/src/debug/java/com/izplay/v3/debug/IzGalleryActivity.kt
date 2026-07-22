@@ -86,7 +86,10 @@ class IzGalleryActivity : ComponentActivity() {
                             IzHero(
                                 title = "A Casa das Sete Mulheres",
                                 description = "A saga de uma família na Revolução Farroupilha.",
+                                eyebrow = "Seu entretenimento",
                                 onPlay = {}, onDetails = {},
+                                playLabel = "Assistir",
+                                detailsLabel = "Mais detalhes",
                                 backdrop = sampleBackdrop(),
                                 badge = { IzBadge("EM DESTAQUE", kind = IzBadgeKind.Info) },
                             )

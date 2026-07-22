@@ -20,6 +20,21 @@
 
     <!-- Screen titles -->
     <string name="screen_playlists">Playlists</string>
+    <!-- Home IZ Play -->
+    <string name="hero_watch">Assistir</string>
+    <string name="hero_details">Mais detalhes</string>
+    <string name="hero_explore">Explorar catálogo</string>
+    <string name="hero_brand_title">Tudo o que você gosta, em um só lugar.</string>
+    <string name="hero_brand_desc">Continue de onde parou ou descubra os conteúdos que estão em alta no IZ Play.</string>
+    <string name="home_kicker_brand">Seu entretenimento</string>
+    <string name="home_kicker_new">Novo no IZ Play</string>
+    <string name="home_kicker_continue">Continue de onde parou</string>
+    <string name="row_recent_channels">Seus canais recentes</string>
+    <string name="row_recent_movies">Filmes adicionados recentemente</string>
+    <string name="row_recent_series">Séries em destaque</string>
+    <string name="row_see_all">Ver todos</string>
+    <string name="kicker_live">AO VIVO</string>
+    <string name="kicker_foryou">Para você</string>
     <string name="screen_home">Home</string>
     <string name="screen_live_tv">Live TV</string>
     <string name="screen_movies">Movies</string>

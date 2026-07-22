@@ -193,6 +193,10 @@ fun PlaylistDashboardScreen(
     )
     Scaffold(
         topBar = {
+            // A Home (Início) não tem top bar: ela é o destino principal —
+            // sidebar indica a seção e o Hero é o elemento dominante. As
+            // outras abas mantêm a barra (voltar/busca/categorias/refresh).
+            if (pagerState.currentPage != PAGE_HOME) {
             TopAppBar(
                 title = {
                     val tabTitleId = TAB_TITLE_IDS.getOrNull(pagerState.currentPage)
@@ -246,6 +250,7 @@ fun PlaylistDashboardScreen(
                     }
                 },
             )
+            }
         },
     ) { innerPadding ->
         when {
@@ -327,8 +332,14 @@ fun PlaylistDashboardScreen(
                         PAGE_HOME -> IzHomeBody(
                             playlistId = playlistId,
                             onOpenMovie = onOpenMovie,
+                            onOpenSeries = onOpenSeries,
                             onResumeEpisode = onResumeEpisode,
                             onPlayLive = onPlayLive,
+                            onExploreCatalog = {
+                                scope.launch { pagerState.animateScrollToPage(1) }
+                            },
+                            seriesByCategory = seriesByCategory,
+                            liveByCategory = liveByCategory,
                         )
                     }
                 }

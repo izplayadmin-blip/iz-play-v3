@@ -17,6 +17,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.izplay.v3.ui.design.IzPreviewSurface
 import com.izplay.v3.ui.design.tokens.IzColor
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import com.izplay.v3.ui.design.tokens.IzSpacing
 import com.izplay.v3.ui.design.tokens.IzType
 
@@ -33,6 +36,7 @@ fun <T> IzContentRow(
     title: String,
     items: List<T>,
     modifier: Modifier = Modifier,
+    kicker: String? = null,
     onSeeMore: (() -> Unit)? = null,
     itemContent: @Composable (T) -> Unit,
 ) {
@@ -43,10 +47,19 @@ fun <T> IzContentRow(
                 .padding(bottom = IzSpacing.md),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(title, style = IzType.Subtitle, color = IzColor.TextPrimary)
+            Text(title, style = IzType.Subtitle.copy(fontSize = 26.sp), color = IzColor.TextPrimary)
+            if (kicker != null) {
+                Text(
+                    kicker.uppercase(),
+                    style = IzType.Caption.copy(fontSize = 13.sp, letterSpacing = 2.sp),
+                    color = IzColor.Live,
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier.padding(start = IzSpacing.sm),
+                )
+            }
             if (onSeeMore != null) {
                 Text(
-                    "Ver mais",
+                    stringResource(com.izplay.v3.R.string.row_see_all),
                     style = IzType.Body,
                     color = IzColor.TextSecondary,
                     textAlign = TextAlign.End,
