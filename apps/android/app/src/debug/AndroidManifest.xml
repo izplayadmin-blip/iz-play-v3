@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Manifesto exclusivo do source set `debug`. É mesclado apenas em builds debug;
+  NUNCA entra no APK release. Declara uma galeria de preview do design system,
+  usada para inspecionar os componentes Iz* e o foco por D-pad em dispositivo
+  real. Não é launcher (sem intent-filter MAIN/LAUNCHER) e não substitui
+  nenhuma tela funcional — é iniciada explicitamente por:
+      adb shell am start -n com.izplay.v3/.debug.IzGalleryActivity
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name=".debug.IzGalleryActivity"
+            android:exported="true"
+            android:label="IZ Play — Design Gallery"
+            android:theme="@style/Theme.IZPlay" />
+    </application>
+
+</manifest>
