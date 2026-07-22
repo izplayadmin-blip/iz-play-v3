@@ -35,20 +35,20 @@
     <string name="row_see_all">Ver todos</string>
     <string name="kicker_live">AO VIVO</string>
     <string name="kicker_foryou">Para você</string>
-    <string name="screen_home">Home</string>
-    <string name="screen_live_tv">Live TV</string>
-    <string name="screen_movies">Movies</string>
-    <string name="screen_series">Series</string>
-    <string name="screen_settings">Settings</string>
-    <string name="screen_search">Search</string>
+    <string name="screen_home">Início</string>
+    <string name="screen_live_tv">Canais de TV</string>
+    <string name="screen_movies">Filmes</string>
+    <string name="screen_series">Séries</string>
+    <string name="screen_settings">Configurações</string>
+    <string name="screen_search">Busca</string>
     <string name="screen_downloads">Downloads</string>
     <string name="screen_watch_history">Watch History</string>
     <string name="screen_m3u_channels">Live Channels</string>
-    <string name="screen_favorites">Favorites</string>
+    <string name="screen_favorites">Favoritos</string>
 
     <!-- Shelves -->
-    <string name="shelf_continue_watching">Continue watching</string>
-    <string name="shelf_recently_added">Recently added</string>
+    <string name="shelf_continue_watching">Continuar assistindo</string>
+    <string name="shelf_recently_added">Adicionados recentemente</string>
 
     <!-- Empty states -->
     <string name="empty_no_playlists">No playlists yet</string>
