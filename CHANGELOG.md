@@ -6,6 +6,21 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
 ## [Não publicado] — branch `codex/v3-bootstrap`
 
+### Layout oficial IZ Play (aprovado) — sidebar, assets, Home · 2026-07-22
+
+- `feat(theme)` `99cbdc4` — tokens e IzSidebar com os parâmetros do V2 Android
+  (78/214dp, expansão por foco, 180ms, `#0A0A0A`/`#F0F0F0`, overlay preto 34%)
+- `feat(assets)` `4580451` — assets oficiais: logo iZ PLAY, ícone adaptive
+  (mipmaps 48–192px + round), banner TV; template genérico removido
+- `feat(splash)` `fbd62a2` — Splash com o logo oficial metálico
+- `feat(home)` `bd21963` — Home IZ Play: sidebar vermelha substitui a bottom
+  bar, aba Início (IzHero determinístico + Continuar assistindo + fileira de
+  lançamentos via Coil), relógio real; back dashboard→lista restaurado
+- Verificado no rk322x API 25: sem crash, D-pad ok, testes 4/4, lint = 5 erros
+  herdados. Pendências: hero fica oculto se o provedor não fornecer `added`;
+  monocromático do ícone aguarda silhueta vetorial; M3U dashboard ainda com
+  chrome antigo.
+
 ### Etapa 3 (início) — Splash + cadastro de playlist · 2026-07-22
 
 #### Adicionado
