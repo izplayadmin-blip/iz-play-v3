@@ -23,6 +23,11 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.painter.BrushPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -81,6 +86,7 @@ class IzGalleryActivity : ComponentActivity() {
                                 title = "A Casa das Sete Mulheres",
                                 description = "A saga de uma família na Revolução Farroupilha.",
                                 onPlay = {}, onDetails = {},
+                                backdrop = sampleBackdrop(),
                                 badge = { IzBadge("EM DESTAQUE", kind = IzBadgeKind.Info) },
                             )
                         }
@@ -104,7 +110,7 @@ class IzGalleryActivity : ComponentActivity() {
                                 title = "Filmes / Lançamentos",
                                 items = listOf("Um Dia", "Vermiglio", "Barba Ensopada", "Heartstopper", "Menudas"),
                                 onSeeMore = {},
-                            ) { name -> IzPosterCard(title = name, onClick = {}) }
+                            ) { name -> IzPosterCard(title = name, onClick = {}, image = samplePoster(name)) }
                         }
                         Section("Cards") {
                             Row(horizontalArrangement = Arrangement.spacedBy(IzSpacing.md)) {
@@ -112,6 +118,7 @@ class IzGalleryActivity : ComponentActivity() {
                                     title = "Globo Centro-Oeste",
                                     subtitle = "Agora: Jornal Nacional",
                                     onClick = {},
+                                    image = samplePoster("Globo"),
                                     progress = 0.6f,
                                     badge = { IzBadge("AO VIVO", kind = IzBadgeKind.Live) },
                                 )
@@ -143,10 +150,31 @@ private fun Section(title: String, content: @Composable () -> Unit) {
     }
 }
 
+/**
+ * Backdrop de exemplo para o Hero (gradiente diagonal). Apenas para a galeria —
+ * em produção o backdrop vem do provedor via os models do Another. Não é asset
+ * de terceiros.
+ */
+private fun sampleBackdrop(): Painter = BrushPainter(
+    Brush.linearGradient(
+        colors = listOf(IzColor.Primary, IzColor.BackgroundDeep, IzColor.Surface2),
+        start = Offset.Zero,
+        end = Offset(1200f, 600f),
+    ),
+)
+
+/** Pôster de exemplo: gradiente determinístico pela hash do título. */
+private fun samplePoster(seed: String): Painter {
+    val h = seed.hashCode()
+    val a = androidx.compose.ui.graphics.Color(0xFF000000 or (h.toLong() and 0x00404040))
+    return BrushPainter(Brush.linearGradient(listOf(IzColor.Surface2, a, IzColor.Surface)))
+}
+
 private val Destinations = listOf(
     IzNavDestination("home", "Início", Icons.Filled.Home),
     IzNavDestination("live", "TV ao vivo", Icons.Filled.LiveTv),
     IzNavDestination("movies", "Filmes", Icons.Filled.Movie),
+    IzNavDestination("series", "Séries", Icons.Filled.Tv),
     IzNavDestination("favorites", "Favoritos", Icons.Filled.Favorite),
     IzNavDestination("search", "Busca", Icons.Filled.Search),
 )

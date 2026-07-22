@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -128,6 +129,7 @@ private val previewDestinations = listOf(
     IzNavDestination("home", "Início", Icons.Filled.Home),
     IzNavDestination("live", "TV ao vivo", Icons.Filled.LiveTv),
     IzNavDestination("movies", "Filmes", Icons.Filled.Movie),
+    IzNavDestination("series", "Séries", Icons.Filled.Tv),
     IzNavDestination("favorites", "Favoritos", Icons.Filled.Favorite),
     IzNavDestination("search", "Busca", Icons.Filled.Search),
 )
