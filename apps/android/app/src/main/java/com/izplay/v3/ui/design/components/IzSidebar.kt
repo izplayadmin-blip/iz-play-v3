@@ -112,7 +112,23 @@ fun IzSidebar(
                 .height(IzSize.sidebarLogoArea),
             contentAlignment = Alignment.Center,
         ) {
-            Text("IZ", fontSize = 22.sp, fontWeight = FontWeight.Black, color = IzColor.TextPrimary)
+            if (expanded) {
+                // Marca completa oficial (proporção 420:141 preservada).
+                androidx.compose.foundation.Image(
+                    painter = androidx.compose.ui.res.painterResource(com.izplay.v3.R.drawable.izplay_logo),
+                    contentDescription = "IZ Play",
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    modifier = Modifier.height(40.dp),
+                )
+            } else {
+                // Símbolo compacto oficial (iZ), dentro da safe zone.
+                androidx.compose.foundation.Image(
+                    painter = androidx.compose.ui.res.painterResource(com.izplay.v3.R.drawable.ic_izplay_foreground),
+                    contentDescription = "IZ Play",
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    modifier = Modifier.height(46.dp),
+                )
+            }
         }
         Box(
             Modifier
