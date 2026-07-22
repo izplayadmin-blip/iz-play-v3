@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.izplay.v3.ui.design.IzPreviewSurface
+import com.izplay.v3.ui.design.focus.IzFocusRing
 import com.izplay.v3.ui.design.focus.izFocusVisuals
 import com.izplay.v3.ui.design.focus.rememberIzInteractionSource
 import com.izplay.v3.ui.design.tokens.IzColor
@@ -72,7 +73,13 @@ fun IzNavigationItem(
     Row(
         modifier = modifier
             .height(48.dp)
-            .izFocusVisuals(interaction, shape = shape, focusedScale = IzFocusScale.Sidebar)
+            .izFocusVisuals(
+                interaction,
+                shape = shape,
+                focusedScale = IzFocusScale.Sidebar,
+                // Item selecionado é vermelho → anel claro; senão, anel vermelho.
+                ring = if (selected) IzFocusRing.OnPrimary else IzFocusRing.OnDark,
+            )
             .clip(shape)
             .background(bg)
             .clickable(interactionSource = interaction, indication = null, onClick = onClick)

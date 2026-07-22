@@ -39,8 +39,15 @@ object IzElevation {
 }
 
 object IzBorder {
-    /** Espessura do contorno de foco (borda vermelha). */
-    val focus = 2.dp
+    /**
+     * Espessura do anel de foco. 3dp para permanecer visível de 720p a 4K —
+     * dp é independente de densidade, mas um traço mais grosso garante leitura
+     * à distância na TV.
+     */
+    val focus = 3.dp
+
+    /** Traço separador do anel de foco, para contraste em qualquer fundo. */
+    val focusSeparator = 1.dp
 
     /** Espessura de divisores e contornos neutros. */
     val hairline = 1.dp

@@ -92,8 +92,8 @@ class IzGalleryActivity : ComponentActivity() {
                         }
                         Section("Botões (o primeiro recebe foco na abertura)") {
                             Row(horizontalArrangement = Arrangement.spacedBy(IzSpacing.md)) {
-                                IzButton("Assistir", onClick = {})
-                                IzButton("Detalhes", onClick = {}, style = IzButtonStyle.Secondary, modifier = Modifier.focusRequester(focusProof))
+                                IzButton("Assistir", onClick = {}, modifier = Modifier.focusRequester(focusProof))
+                                IzButton("Detalhes", onClick = {}, style = IzButtonStyle.Secondary)
                                 IzButton("Indisponível", onClick = {}, enabled = false)
                             }
                         }

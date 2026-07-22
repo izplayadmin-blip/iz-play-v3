@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.izplay.v3.ui.design.IzPreviewSurface
+import com.izplay.v3.ui.design.focus.IzFocusRing
 import com.izplay.v3.ui.design.focus.izFocusVisuals
 import com.izplay.v3.ui.design.focus.rememberIzInteractionSource
 import com.izplay.v3.ui.design.tokens.IzColor
@@ -61,11 +62,16 @@ fun IzButton(
         IzButtonStyle.Secondary -> IzColor.TextPrimary
     }
 
+    val focusRing = when (style) {
+        IzButtonStyle.Primary -> IzFocusRing.OnPrimary
+        IzButtonStyle.Secondary -> IzFocusRing.OnDark
+    }
+
     Box(
         modifier = modifier
             .height(IzSize.buttonHeight)
             .defaultMinSize(minWidth = 96.dp)
-            .izFocusVisuals(interaction, shape = shape, focusedScale = IzFocusScale.Button)
+            .izFocusVisuals(interaction, shape = shape, focusedScale = IzFocusScale.Button, ring = focusRing)
             .clip(shape)
             .background(if (enabled) container else container.copy(alpha = IzOpacity.Disabled))
             .then(
