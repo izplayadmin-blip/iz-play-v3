@@ -47,7 +47,11 @@ Nada nesta categoria na Etapa 0.
 - ~~Design system IZ Play V3 (Etapa 2)~~ ✅ concluído 2026-07-22 (tokens + 14
   componentes `Iz*` isolados em `ui/design`, com galeria debug e foco de TV
   verificado em dispositivo real). Ver `DESIGN_SYSTEM.md`.
-- Splash, sidebar, Home, migração visual das telas (Etapa 3)
+- **Etapa 3 (parcial)** ✅ 2026-07-22: **Splash** + **cadastro de playlist**
+  (Xtream/M3U) migrados para a identidade IZ Play, verificados no API 25.
+  Contraste de foco corrigido (anel branco/vermelho conforme o fundo).
+- Pendente Etapa 3: Home, sidebar funcional, catálogo, detalhes, busca,
+  favoritos, histórico, configurações, controles do player.
 - Suporte a Android TV: `LEANBACK_LAUNCHER`, banner, D-pad, foco (Etapa 4)
 - Ícone e banner próprios — hoje o app ainda usa o adaptive icon genérico do template
 - `CHANGELOG.md` a cada tela migrada

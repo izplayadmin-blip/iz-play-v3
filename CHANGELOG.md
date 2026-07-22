@@ -6,6 +6,40 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
 ## [Não publicado] — branch `codex/v3-bootstrap`
 
+### Etapa 3 (início) — Splash + cadastro de playlist · 2026-07-22
+
+#### Adicionado
+
+- Splash da marca IZ Play (`ui/splash/SplashScreen.kt`): fundo preto, logo
+  centralizado, fade+escala curtos; roteia uma vez para dashboard/lista
+  conforme o estado, sem flash — `feat(splash)`
+- `IzLogo`: wordmark "IZ PLAY" em Compose (código próprio; trocar pelo asset
+  oficial após confirmar autoria/licença) — `feat(splash)`
+- `windowBackground` preto em `Theme.IZPlay`: elimina o flash branco no
+  arranque — `feat(splash)`
+
+#### Alterado
+
+- Identidade IZ Play aplicada às telas de cadastro de playlist
+  (`PlaylistScreen`, `AddXtreamPlaylistScreen`, `AddM3UPlaylistScreen`) via
+  `IzTheme` + `IzButton` — **só apresentação, lógica preservada** — `feat(ui)`
+- Lógica de retomada movida (sem mudança de comportamento) para a Splash, para
+  eliminar o flash de "No playlists yet"
+
+#### Verificado (dispositivo API 25)
+
+- Splash → dashboard sem flash branco nem flash de lista vazia
+- Lista de playlists, sheet "Add Playlist" e form "New Xtream Playlist" na
+  identidade IZ Play; botão voltar correto (form → lista → sai), sem crash
+- Playlist real e pref de sessão do usuário **preservadas** (pref limpa
+  temporariamente só para captura, restaurada ao valor exato)
+- `assembleDebug` + `testDebugUnitTest` verdes; lint = mesmos 5 erros herdados
+- Reprodução de conteúdo permanece **bloqueada** (sem credenciais autorizadas)
+
+#### Não migrado nesta etapa (conforme escopo)
+
+Home, sidebar funcional, catálogo, detalhes e player — permanecem como estão.
+
 ### Etapa 2 — Design system IZ Play V3 · 2026-07-22
 
 #### Adicionado
