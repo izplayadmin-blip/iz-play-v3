@@ -17,7 +17,12 @@ android {
 
     defaultConfig {
         applicationId = "com.izplay.v3"
-        minSdk = 26
+        // As TV boxes rk322x alvo do IZ Play reportam API 25 (Android 7.1),
+        // apesar de anunciarem "Android 11.1" no marketing. minSdk 24 as cobre.
+        // Todo uso de API 26+ (PiP, canais de notificação, AudioFocusRequest)
+        // tem guarda de runtime; java.time é reimplementado pelo desugaring.
+        // Verificado por `lint` (checagem NewApi) com esta minSdk.
+        minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "3.0.0"
@@ -59,6 +64,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        // java.time em PlaylistSettingsScreen é API 26+; o desugaring o
+        // reimplementa para API 24/25 sem alterar o código.
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -115,6 +123,9 @@ dependencies {
     // file via `ACTION_OPEN_DOCUMENT`; DocumentFile gives us a stable handle
     // to read the bytes back without having to keep the original Uri around.
     implementation(libs.androidx.documentfile)
+
+    // Reimplementa java.time (usado em PlaylistSettingsScreen) para API 24/25.
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
