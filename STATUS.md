@@ -23,13 +23,19 @@ trabalho local, nada enviado para nenhum remoto.
 
 | Item | Evidência |
 |---|---|
-| Build debug do IZ Play V3 | `assembleDebug` BUILD SUCCESSFUL, 2m11s, 50 tasks |
+| Build debug do IZ Play V3 | `assembleDebug` BUILD SUCCESSFUL, 50 tasks |
 | Build nativo JNI/MPV (CMake) | `buildCMakeDebug` verde nas 3 ABIs |
 | Testes unitários | 4 testes, 0 falhas, 0 erros |
+| Auditoria de API (lint `NewApi`, minSdk 24) | **zero chamadas de API 26+ sem guarda** |
 | Empacotamento das ABIs | APK contém `arm64-v8a`, `armeabi-v7a`, `x86_64` |
-| Identidade do app | `aapt2 dump badging`: `com.izplay.v3`, versionName `3.0.0`, minSdk 26, targetSdk 36 |
+| Identidade do app | `aapt2 dump badging`: `com.izplay.v3`, versionName `3.0.0`, **minSdk 24**, targetSdk 36 |
+| **Instalação no dispositivo API 25** | `adb install -r` → **Success** no rk322x MCD-121 |
+| **Abertura / ausência de crash** | app abre em `MainActivity`, processo vivo, **zero FATAL/ANR** |
+| **Navegação (sem credenciais)** | Live TV, Movies, Series, Settings, Search — todas carregam |
+| **Botão voltar** | volta sem sair do app nem crashar |
+| **Persistência (cold start)** | após `force-stop` + reabrir, Home e "Continue watching" restaurados |
 | Build do upstream puro | `assembleDebug` BUILD SUCCESSFUL em worktree isolado no commit `f71a552` |
-| Preservação do trabalho local | 100 arquivos comparados byte a byte com o backup; só os 2 arquivos do revert de minSdk diferem |
+| Preservação do trabalho local | 100 arquivos comparados byte a byte com o backup |
 | Ausência de segredos nos commits | varredura do diff `main..HEAD`: só fixtures de teste com domínio reservado `provider.test` |
 
 ## 🟡 Parcialmente funcionando
@@ -48,39 +54,25 @@ Nada nesta categoria na Etapa 0.
 
 ## 🔴 Bloqueado
 
-### Bloqueio A — incompatibilidade de plataforma (novo, 2026-07-21)
+### Bloqueio A — RESOLVIDO (2026-07-21): minSdk 24
 
-A instalação no único dispositivo disponível **falhou**:
+A instalação inicial falhou com `minSdk 26`
+(`INSTALL_FAILED_OLDER_SDK`, dispositivo API 25). Após decisão autorizada,
+`minSdk` foi baixado para **24** (commit `0902b86`), com auditoria de lint
+confirmando zero uso de API 26+ sem guarda. **Instalação e smoke test agora
+passam** — ver a tabela "Funcionando" acima.
 
-```
-INSTALL_FAILED_OLDER_SDK: Requires newer sdk version #26 (current version is #25)
-```
+Dispositivo de teste:
 
 | Dispositivo | `192.168.15.23:5555` |
 |---|---|
 | Fabricante / modelo | rockchip / MCD-121 (`rk322x_box`) |
-| Android anunciado | "11.1" |
-| **API real** | **25 (Android 7.1)** |
+| API real | 25 (Android 7.1) |
 | ABI | `armeabi-v7a` |
 | Características | `box` — **sem** `android.software.leanback` |
 
-Com `minSdk = 26` o IZ Play V3 não instala neste aparelho. **Todo o smoke test
-está bloqueado por esta causa**, antes mesmo da questão de credenciais:
-
-abertura · splash · cadastro de playlist · navegação · fechar e reabrir ·
-persistência · botão voltar · rotação/orientação · ausência de crash
-
-Observações do aparelho, sem nenhuma alteração feita nele:
-
-- `com.izplay.v3` **já estava instalado** (build anterior, `minSdk=24`,
-  instalado em 2026-07-21 09:54). Não foi desinstalado nem alterado.
-- `com.izplay.tv` (IZ Play V2, versão 2.1.11) está presente. Não foi tocado —
-  e confirma a necessidade do isolamento de banco/preferências feito em
-  `6dfa354`.
-
-**Decisão pendente do responsável:** manter `minSdk 26` e obter um dispositivo
-Android 8+ para validação, ou reavaliar a faixa de suporte em função da frota
-real de TV boxes. Registrado em `MIGRATION_PLAN.md`.
+Sem alterações no aparelho: o `com.izplay.tv` (IZ Play V2, 2.1.11) presente não
+foi tocado — e confirma a necessidade do isolamento de storage (`6dfa354`).
 
 ### Bloqueio B — ausência de credenciais
 
@@ -105,9 +97,17 @@ ambiente sobre o binário do V3. Por isso permanece bloqueado aqui.
 
 | Item | Gravidade | Nota |
 |---|---|---|
+| Strings ainda em turco em Settings e Search (ex.: "Kategoriler, filmler...", "Kanal, film veya dizi") | média | Herdado do upstream; faltam traduções pt/en. Corrigir na migração visual dessas telas |
+| 5 erros de lint pré-existentes (ScaffoldPadding ×2, ByteOrderMark, ForegroundServiceType, PropertyEscape do `local.properties`) | baixa | Herdados do upstream / arquivo local; nenhum é `NewApi`; não introduzidos pela mudança de minSdk |
 | 2 warnings de deprecação Compose (`Icons.Filled.VolumeUp`, `Icons.Filled.PlaylistPlay`) | baixa | Herdados do upstream; usar as variantes `AutoMirrored` |
 | Fixture de `@Preview` em `PlaylistScreen.kt` com credencial de aparência real | baixa | Código upstream, não alterado; trocar por valores neutros na migração visual dessa tela |
 | Base 1 mês atrás do upstream (`f71a552` vs `ff061f0`) | informativo | Congelamento deliberado |
+
+### Nota sobre orientação
+
+O dispositivo de teste é um TV box HDMI (`mHdmiPlugged=true`), saída fixa em
+landscape 1920×1080. Teste de rotação de tela **não se aplica** a esta classe de
+hardware. Deve ser verificado em telefone/tablet na Etapa 3.
 
 ---
 
@@ -115,7 +115,7 @@ ambiente sobre o binário do V3. Por isso permanece bloqueado aqui.
 
 | Dispositivo | Estado |
 |---|---|
-| `192.168.15.23:5555` — rockchip MCD-121 (`rk322x_box`), API 25, `armeabi-v7a` | conectado e autorizado — **instalação tentada e recusada** (`INSTALL_FAILED_OLDER_SDK`) |
+| `192.168.15.23:5555` — rockchip MCD-121 (`rk322x_box`), API 25, `armeabi-v7a` | **instalado e smoke test aprovado** com o APK minSdk 24 |
 | `ca1a4656` | não aparece mais na lista |
 | Android TV / TV Box físico | não disponível nesta sessão |
 | Telas 720p / 1080p / 4K | não testadas |

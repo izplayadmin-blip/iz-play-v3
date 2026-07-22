@@ -6,6 +6,27 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
 ## [Não publicado] — branch `codex/v3-bootstrap`
 
+### minSdk 24 + smoke test no dispositivo · 2026-07-21
+
+#### Alterado
+
+- `minSdk` de 26 para **24** para cobrir TV boxes rk322x (API 25), com core
+  library desugaring restaurado para `java.time` — `0902b86`
+
+#### Verificado
+
+- Auditoria de lint (`NewApi`, minSdk 24): **zero** uso de API 26+ sem guarda
+- `assembleDebug` verde, `testDebugUnitTest` 4/4 verde, APK reporta minSdk 24
+- `adb install -r` no rk322x MCD-121 (API 25): **Success**
+- Smoke test sem credenciais: abertura, navegação (Live TV/Movies/Series/
+  Settings/Search), botão voltar, persistência em cold start — **sem crash**
+- Testes dependentes de servidor permanecem **bloqueados** (sem credenciais)
+
+#### Infra
+
+- Removida a pasta órfã `C:\Users\deivi\izplay-base` (worktree do upstream, já
+  desregistrado; APK e evidências preservados em `izplay-baselines/`)
+
 ### Etapa 0 — Base preservada e compilável · 2026-07-21
 
 Tag: **`baseline/another-functional`**
