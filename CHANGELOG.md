@@ -6,6 +6,22 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
 ## [Não publicado] — branch `codex/v3-bootstrap`
 
+### Correção visual IZ Play (comparação real V2×V3 no box) · 2026-07-22
+
+- `fix(home)` `ae14152` — **Hero sempre presente** com cadeia determinística de
+  fallback (filme c/ arte → série c/ capa → continuar assistindo → sem arte →
+  canal → institucional; só dados reais); composição de TV restaurada: sem
+  seta/"Home" no topo, fileiras Continuar assistindo / Seus canais recentes
+  (AO VIVO) / Filmes recentes / Séries em destaque / categorias ao vivo;
+  kicker amarelo e "Ver todos" nas fileiras; títulos 26sp
+- `fix(i18n)` `050aedf` + `1d8d5cd` — telas migradas em português (Início,
+  Canais de TV, Filmes, Séries, Configurações, Busca, Favoritos, Continuar
+  assistindo…), com pares turcos para manter o lint no baseline
+- `fix(brand)` `50997a5` — sidebar usa os assets oficiais: símbolo iZ compacto
+  (recolhida) e wordmark completo (expandida); sem "IZ" em texto
+- Verificado no rk322x API 25: hero com pôster real, foco vermelho em card,
+  sidebar expande por foco, zero crash; lint = 5 erros herdados; testes 4/4
+
 ### Layout oficial IZ Play (aprovado) — sidebar, assets, Home · 2026-07-22
 
 - `feat(theme)` `99cbdc4` — tokens e IzSidebar com os parâmetros do V2 Android
