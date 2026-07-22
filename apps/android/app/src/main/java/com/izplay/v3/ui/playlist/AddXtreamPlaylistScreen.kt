@@ -55,6 +55,7 @@ import com.izplay.v3.ui.LocalPlaylistRepository
 import com.izplay.v3.ui.components.ModalSlideContainer
 import com.izplay.v3.ui.components.SavingOverlay
 import com.izplay.v3.ui.components.SectionHeader
+import com.izplay.v3.ui.design.IzTheme
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -186,6 +187,7 @@ fun AddXtreamPlaylistScreen(
     }
 
     ModalSlideContainer {
+        IzTheme {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -314,6 +316,7 @@ fun AddXtreamPlaylistScreen(
                     }
                 },
             )
+        }
         }
     }
 }

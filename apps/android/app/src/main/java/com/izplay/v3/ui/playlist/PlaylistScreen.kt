@@ -65,6 +65,8 @@ import com.izplay.v3.model.Playlist
 import com.izplay.v3.model.PlaylistKind
 import com.izplay.v3.ui.LocalPlaylistRepository
 import com.izplay.v3.ui.theme.IZPlayTheme
+import com.izplay.v3.ui.design.IzTheme
+import com.izplay.v3.ui.design.components.IzButton
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,6 +85,9 @@ fun PlaylistScreen(
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
+    // Identidade IZ Play (preto/vermelho/branco) sobre a MESMA lógica: só
+    // envolvemos o conteúdo no tema do design system; nada de dados muda.
+    IzTheme {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -151,6 +156,7 @@ fun PlaylistScreen(
             },
             onDismiss = { playlistToDelete = null },
         )
+    }
     }
 }
 
@@ -317,11 +323,7 @@ private fun EmptyState(modifier: Modifier = Modifier, onAdd: () -> Unit) {
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(24.dp))
-        Button(onClick = onAdd) {
-            Icon(Icons.Default.Add, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Add Playlist")
-        }
+        IzButton(text = "Add Playlist", onClick = onAdd, leadingIcon = Icons.Default.Add)
     }
 }
 

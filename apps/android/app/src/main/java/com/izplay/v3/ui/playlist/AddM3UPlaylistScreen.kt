@@ -67,6 +67,7 @@ import com.izplay.v3.ui.components.ModalSlideContainer
 import com.izplay.v3.ui.components.SavingOverlay
 import com.izplay.v3.ui.components.SectionHeader
 import com.izplay.v3.ui.theme.IZPlayTheme
+import com.izplay.v3.ui.design.IzTheme
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -183,6 +184,7 @@ fun AddM3UPlaylistScreen(
     }
 
     ModalSlideContainer {
+        IzTheme {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -291,6 +293,7 @@ fun AddM3UPlaylistScreen(
 
         if (isSaving) {
             SavingOverlay(importStatus)
+        }
         }
     }
 }
