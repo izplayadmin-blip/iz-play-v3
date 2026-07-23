@@ -121,7 +121,16 @@ fun AddXtreamPlaylistScreen(
     val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
 
-    val isValid = name.isNotBlank() &&
+    // DNS fixo (login V2: só usuário/senha). Vazio => campos completos.
+    val defaultDns = com.izplay.v3.BuildConfig.DEFAULT_DNS
+    val useFixedDns = defaultDns.isNotBlank() && editing == null
+    LaunchedEffect(useFixedDns) {
+        if (useFixedDns && (serverUrl.isBlank() || serverUrl == "http://")) {
+            serverUrl = defaultDns
+        }
+    }
+
+    val isValid = (name.isNotBlank() || useFixedDns) &&
         serverUrl.isNotBlank() && serverUrl != "http://" &&
         username.isNotBlank() &&
         password.isNotBlank()
@@ -146,7 +155,7 @@ fun AddXtreamPlaylistScreen(
             val current = editing
             val newPlaylist = Playlist.create(
                 id = current?.id ?: UUID.randomUUID().toString(),
-                name = name.trim(),
+                name = name.trim().ifBlank { "IZ Play" },
                 serverUrl = serverUrl.trim(),
                 username = username.trim(),
                 password = password.trim(),
@@ -295,8 +304,10 @@ fun AddXtreamPlaylistScreen(
                         )
                         Spacer(Modifier.height(14.dp))
                     }
-                    IzLoginField("Servidor (http://...)", serverUrl, Icons.Filled.Storage) { serverUrl = it }
-                    Spacer(Modifier.height(18.dp))
+                    if (!useFixedDns) {
+                        IzLoginField("Servidor (http://...)", serverUrl, Icons.Filled.Storage) { serverUrl = it }
+                        Spacer(Modifier.height(18.dp))
+                    }
                     IzLoginField("Usuario", username, Icons.Filled.Person) { username = it }
                     Spacer(Modifier.height(18.dp))
                     IzLoginField(
@@ -307,8 +318,10 @@ fun AddXtreamPlaylistScreen(
                         passVisible = passwordVisible,
                         onTogglePass = { passwordVisible = !passwordVisible },
                     ) { password = it }
-                    Spacer(Modifier.height(18.dp))
-                    IzLoginField("Nome da lista", name, Icons.AutoMirrored.Filled.Label) { name = it }
+                    if (!useFixedDns) {
+                        Spacer(Modifier.height(18.dp))
+                        IzLoginField("Nome da lista", name, Icons.AutoMirrored.Filled.Label) { name = it }
+                    }
                     Spacer(Modifier.height(22.dp))
                     IzEntrarButton(enabled = isValid && !isSaving, onClick = ::save)
                     Spacer(Modifier.height(18.dp))
@@ -318,7 +331,11 @@ fun AddXtreamPlaylistScreen(
         }
 
         if (isSaving) {
-            SavingOverlay(progressMessage ?: verifyingMessage)
+            // Tela de espera da marca (logo + barra), igual ao V2 — no lugar
+            // da caixinha genérica de progresso.
+            com.izplay.v3.ui.design.components.IzLoadingScreen(
+                message = progressMessage ?: verifyingMessage,
+            )
         }
 
         errorMessage?.let { msg ->

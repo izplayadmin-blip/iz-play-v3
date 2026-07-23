@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -9,6 +11,14 @@ plugins {
 // Nomeia os artefatos como IZPlay-V3-<variant>.apk em vez de app-<variant>.apk.
 base {
     archivesName.set("IZPlay-V3")
+}
+
+// DNS padrão do provedor (login apenas com usuário/senha, como no V2).
+// Lido de `izplay.properties` na raiz do módulo Android — arquivo GITIGNORADO,
+// nunca commitado. Vazio => o campo Servidor volta a aparecer no login.
+val izplayProps = Properties().apply {
+    val f = rootProject.file("izplay.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
 }
 
 android {
@@ -26,6 +36,12 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "3.0.0"
+
+        buildConfigField(
+            "String",
+            "DEFAULT_DNS",
+            "\"${izplayProps.getProperty("izplay.defaultDns", "")}\"",
+        )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

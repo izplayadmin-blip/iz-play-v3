@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# DNS padrão do provedor — nunca commitar
+izplay.properties

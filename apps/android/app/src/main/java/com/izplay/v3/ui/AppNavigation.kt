@@ -160,8 +160,14 @@ fun AppNavigation() {
                     popUpTo(Routes.SPLASH) { inclusive = true }
                     launchSingleTop = true
                 }
-                if (match != null) {
-                    navController.navigate(Routes.dashboard(match.id)) {
+                when {
+                    match != null -> navController.navigate(Routes.dashboard(match.id)) {
+                        launchSingleTop = true
+                    }
+                    // Fluxo V2: sem nenhuma playlist, o app abre DIRETO no
+                    // login (usuário/senha). A lista de gerenciamento fica
+                    // escondida por baixo — acessível pelo voltar.
+                    list.isEmpty() -> navController.navigate(Routes.xtream()) {
                         launchSingleTop = true
                     }
                 }
