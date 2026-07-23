@@ -324,8 +324,12 @@ fun AddXtreamPlaylistScreen(
                     }
                     Spacer(Modifier.height(22.dp))
                     IzEntrarButton(enabled = isValid && !isSaving, onClick = ::save)
-                    Spacer(Modifier.height(18.dp))
-                    AdultContentToggle(checked = filterAdultContent, onCheckedChange = { filterAdultContent = it })
+                    // O filtro de conteúdo adulto saiu do login (pedido do
+                    // responsável). Em EDIÇÃO a opção continua disponível.
+                    if (editing != null) {
+                        Spacer(Modifier.height(18.dp))
+                        AdultContentToggle(checked = filterAdultContent, onCheckedChange = { filterAdultContent = it })
+                    }
                 }
             }
         }
