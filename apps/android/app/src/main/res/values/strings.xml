@@ -35,6 +35,16 @@
     <string name="row_see_all">Ver todos</string>
     <string name="kicker_live">AO VIVO</string>
     <string name="kicker_foryou">Para você</string>
+    <!-- Zapping (lista + prévia) -->
+    <string name="zap_category">Categoria</string>
+    <string name="zap_search_channel">Buscar canal…</string>
+    <string name="zap_channels_count">%1$d canais</string>
+    <string name="zap_favorite">Favorito</string>
+    <string name="zap_reconnect">Reconectar</string>
+    <string name="zap_fullscreen">Tela cheia</string>
+    <string name="zap_info">Info</string>
+    <string name="zap_epg">Programação</string>
+    <string name="zap_epg_none">Sem informações de programação</string>
     <string name="screen_home">Início</string>
     <string name="screen_live_tv">Canais de TV</string>
     <string name="screen_movies">Filmes</string>

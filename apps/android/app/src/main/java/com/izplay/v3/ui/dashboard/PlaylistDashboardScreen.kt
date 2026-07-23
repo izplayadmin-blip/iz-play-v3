@@ -43,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -132,6 +133,9 @@ fun PlaylistDashboardScreen(
     // hide/unhide writes the right namespace.
     val pickerSheetState = rememberModalBottomSheetState()
     var pickerType by remember { mutableStateOf<String?>(null) }
+
+    // Categoria ativa do zapping de canais (persistente por playlist).
+    var liveZapCategoryId by rememberSaveable(playlistId) { mutableStateOf<String?>(null) }
 
     // Relógio real da sidebar (V2 mostra HH:mm na base da faixa vermelha).
     var clock by remember { mutableStateOf(clockNow()) }
@@ -287,11 +291,9 @@ fun PlaylistDashboardScreen(
                             playlistId = playlistId,
                             categories = liveCats,
                             byCategoryId = liveByCategory,
-                            streamsLoading = !streamsLoaded,
-                            onOpenCategory = onOpenLiveCategory,
+                            zapCategoryId = liveZapCategoryId,
+                            onPickCategory = { pickerType = "live" },
                             onPlayChannel = onPlayLive,
-                            onResumeMovie = onOpenMovie,
-                            onResumeEpisode = onResumeEpisode,
                         )
                         1 -> MoviesTabBody(
                             playlistId = playlistId,
@@ -363,9 +365,10 @@ fun PlaylistDashboardScreen(
             categories = categoriesForSheet,
             itemCountsByCategoryId = countsForSheet,
             sheetState = pickerSheetState,
-            onSelect = {
-                // Jump-to-category scroll lands in a follow-up; closing the
-                // sheet on selection still matches iOS UX.
+            onSelect = { categoryId ->
+                // Na aba de canais, escolher categoria troca a lista do
+                // zapping (layout V2). Nas demais, apenas fecha a sheet.
+                if (activePickerType == "live") liveZapCategoryId = categoryId
                 scope.launch { pickerSheetState.hide() }.invokeOnCompletion {
                     pickerType = null
                 }
@@ -424,12 +427,12 @@ private fun LiveTabBody(
     playlistId: String,
     categories: List<CategoryEntity>,
     byCategoryId: Map<String, List<LiveStreamWithCategory>>,
-    streamsLoading: Boolean,
-    onOpenCategory: (String) -> Unit,
+    zapCategoryId: String?,
+    onPickCategory: () -> Unit,
     onPlayChannel: (Int) -> Unit,
-    onResumeMovie: (Int) -> Unit = {},
-    onResumeEpisode: (String) -> Unit = {},
 ) {
+    // Layout de zapping do V2: lista da categoria à esquerda + prévia ao vivo
+    // à direita. A categoria vem do seletor (ícone de lista / cabeçalho).
     val hiddenStore = com.izplay.v3.ui.LocalHiddenCategoryStore.current
     val hiddenIds by hiddenStore.observeHidden(playlistId, "live")
         .collectAsStateWithLifecycle(initialValue = hiddenStore.hiddenIds(playlistId, "live"))
@@ -440,41 +443,15 @@ private fun LiveTabBody(
         EmptyTab(message = if (categories.isEmpty()) stringResource(com.izplay.v3.R.string.empty_no_categories) else stringResource(com.izplay.v3.R.string.empty_categories_hidden))
         return
     }
-    LazyColumn(
-        contentPadding = PaddingValues(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        item(key = "continue-watching") {
-            ContinueWatchingShelf(
-                playlistId = playlistId,
-                onResumeMovie = onResumeMovie,
-                onResumeSeries = onResumeEpisode,
-                onPlayLive = onPlayChannel,
-            )
-        }
-        items(visibleCategories, key = { "live_${it.id}" }) { category ->
-            val items = byCategoryId[category.id].orEmpty()
-            CategoryShelf(
-                title = category.name,
-                itemCount = items.size,
-                streamsLoading = streamsLoading,
-                onHeaderClick = { onOpenCategory(category.id) },
-            ) {
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    items(items, key = { it.id }) { row ->
-                        LiveStreamCard(
-                            name = row.stream.name,
-                            iconUrl = row.stream.streamIcon,
-                            onClick = { onPlayChannel(row.stream.streamId) },
-                        )
-                    }
-                }
-            }
-        }
-    }
+    val current = visibleCategories.firstOrNull { it.id == zapCategoryId }
+        ?: visibleCategories.first()
+    com.izplay.v3.ui.zapping.ZappingBody(
+        playlistId = playlistId,
+        categoryLabel = current.name,
+        channels = byCategoryId[current.id].orEmpty(),
+        onOpenFullscreen = onPlayChannel,
+        onPickCategory = onPickCategory,
+    )
 }
 
 @Composable

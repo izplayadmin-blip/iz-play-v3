@@ -35,6 +35,16 @@
     <string name="row_see_all">Tümünü gör</string>
     <string name="kicker_live">CANLI</string>
     <string name="kicker_foryou">Size özel</string>
+    <!-- Zapping -->
+    <string name="zap_category">Kategori</string>
+    <string name="zap_search_channel">Kanal ara…</string>
+    <string name="zap_channels_count">%1$d kanal</string>
+    <string name="zap_favorite">Favori</string>
+    <string name="zap_reconnect">Yeniden bağlan</string>
+    <string name="zap_fullscreen">Tam ekran</string>
+    <string name="zap_info">Bilgi</string>
+    <string name="zap_epg">Program akışı</string>
+    <string name="zap_epg_none">Program bilgisi yok</string>
     <string name="screen_home">Ana sayfa</string>
     <string name="screen_live_tv">Canlı TV</string>
     <string name="screen_movies">Filmler</string>

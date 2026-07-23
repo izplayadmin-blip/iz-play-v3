@@ -82,6 +82,7 @@ fun FavoritesScreen(
     val seriesFavs by favoriteRepository.observeSeries(playlistId)
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
+    com.izplay.v3.ui.design.IzTheme {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -108,26 +109,14 @@ fun FavoritesScreen(
 
             when (selected) {
                 FavoriteType.LIVE -> {
-                    if (liveFavs.isEmpty()) {
-                        EmptyState(icon = Icons.Default.LiveTv, message = stringResource(R.string.empty_favorites_live))
-                    } else {
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(110.dp),
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                        ) {
-                            items(liveFavs.size, key = { idx -> "live_${liveFavs[idx].id}" }) { idx ->
-                                val row = liveFavs[idx]
-                                LiveStreamCard(
-                                    name = row.stream.name,
-                                    iconUrl = row.stream.streamIcon,
-                                    onClick = { onPlayLive(row.stream.streamId) },
-                                )
-                            }
-                        }
-                    }
+                    // Layout de zapping do V2: lista de favoritos + prévia ao
+                    // vivo. Mesmo vazio, a estrutura permanece (como no V2).
+                    com.izplay.v3.ui.zapping.ZappingBody(
+                        playlistId = playlistId,
+                        categoryLabel = stringResource(R.string.screen_favorites),
+                        channels = liveFavs,
+                        onOpenFullscreen = onPlayLive,
+                    )
                 }
                 FavoriteType.VOD -> {
                     if (vodFavs.isEmpty()) {
@@ -177,6 +166,7 @@ fun FavoritesScreen(
                 }
             }
         }
+    }
     }
 }
 
