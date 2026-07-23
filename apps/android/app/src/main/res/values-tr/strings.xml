@@ -36,6 +36,7 @@
     <string name="kicker_live">CANLI</string>
     <string name="kicker_foryou">Size özel</string>
     <!-- Zapping -->
+    <string name="zap_categories">Kategoriler</string>
     <string name="zap_category">Kategori</string>
     <string name="zap_search_channel">Kanal ara…</string>
     <string name="zap_channels_count">%1$d kanal</string>

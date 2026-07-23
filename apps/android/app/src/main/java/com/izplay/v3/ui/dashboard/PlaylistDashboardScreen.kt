@@ -200,7 +200,7 @@ fun PlaylistDashboardScreen(
             // A Home (Início) não tem top bar: ela é o destino principal —
             // sidebar indica a seção e o Hero é o elemento dominante. As
             // outras abas mantêm a barra (voltar/busca/categorias/refresh).
-            if (pagerState.currentPage != PAGE_HOME) {
+            if (pagerState.currentPage != PAGE_HOME && pagerState.currentPage != 0) {
             TopAppBar(
                 title = {
                     val tabTitleId = TAB_TITLE_IDS.getOrNull(pagerState.currentPage)
@@ -293,6 +293,7 @@ fun PlaylistDashboardScreen(
                             byCategoryId = liveByCategory,
                             zapCategoryId = liveZapCategoryId,
                             onPickCategory = { pickerType = "live" },
+                            onSelectZapCategory = { liveZapCategoryId = it },
                             onPlayChannel = onPlayLive,
                         )
                         1 -> MoviesTabBody(
@@ -429,6 +430,7 @@ private fun LiveTabBody(
     byCategoryId: Map<String, List<LiveStreamWithCategory>>,
     zapCategoryId: String?,
     onPickCategory: () -> Unit,
+    onSelectZapCategory: (String) -> Unit,
     onPlayChannel: (Int) -> Unit,
 ) {
     // Layout de zapping do V2: lista da categoria à esquerda + prévia ao vivo
@@ -445,14 +447,28 @@ private fun LiveTabBody(
     }
     val current = visibleCategories.firstOrNull { it.id == zapCategoryId }
         ?: visibleCategories.first()
+    // FAVORITOS entra como pseudocategoria no topo do painel (padrão V2).
+    val liveFavs by com.izplay.v3.ui.LocalFavoriteRepository.current
+        .observeLive(playlistId)
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+    val favLabel = stringResource(com.izplay.v3.R.string.screen_favorites)
+    val isFav = zapCategoryId == FAV_CATEGORY_ID
     com.izplay.v3.ui.zapping.ZappingBody(
         playlistId = playlistId,
-        categoryLabel = current.name,
-        channels = byCategoryId[current.id].orEmpty(),
+        categoryLabel = if (isFav) favLabel else current.name,
+        channels = if (isFav) liveFavs else byCategoryId[current.id].orEmpty(),
         onOpenFullscreen = onPlayChannel,
-        onPickCategory = onPickCategory,
+        categories = listOf(FAV_CATEGORY_ID to favLabel) +
+            visibleCategories.map { it.id to it.name },
+        categoryCounts = byCategoryId.mapValues { it.value.size } +
+            mapOf(FAV_CATEGORY_ID to liveFavs.size),
+        selectedCategoryId = if (isFav) FAV_CATEGORY_ID else current.id,
+        onSelectCategory = onSelectZapCategory,
     )
 }
+
+/** Pseudocategoria "Favoritos" do painel de categorias do zapping. */
+private const val FAV_CATEGORY_ID = "__izplay_favorites__"
 
 @Composable
 private fun MoviesTabBody(

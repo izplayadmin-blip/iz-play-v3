@@ -21,6 +21,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
@@ -84,6 +86,10 @@ fun ZappingBody(
     onOpenFullscreen: (streamId: Int) -> Unit,
     modifier: Modifier = Modifier,
     onPickCategory: (() -> Unit)? = null,
+    categories: List<Pair<String, String>> = emptyList(),
+    categoryCounts: Map<String, Int> = emptyMap(),
+    selectedCategoryId: String? = null,
+    onSelectCategory: ((String) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val playlistRepository = LocalPlaylistRepository.current
@@ -94,6 +100,7 @@ fun ZappingBody(
     LaunchedEffect(playlistId) { playlist = playlistRepository.find(playlistId) }
 
     var query by remember { mutableStateOf("") }
+    var showCategories by remember { mutableStateOf(false) }
     val filtered = remember(channels, query) {
         if (query.isBlank()) channels
         else channels.filter { it.stream.name.contains(query, ignoreCase = true) }
@@ -140,13 +147,26 @@ fun ZappingBody(
                 .background(IzColor.BackgroundDeep)
                 .padding(horizontal = IzSpacing.md, vertical = IzSpacing.md),
         ) {
-            Text(
-                stringResource(R.string.zap_category).uppercase(),
-                color = IzColor.TextSecondary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = 2.sp,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (onSelectCategory != null) {
+                    Icon(
+                        Icons.Filled.Menu,
+                        contentDescription = stringResource(R.string.zap_categories),
+                        tint = IzColor.Primary,
+                        modifier = Modifier
+                            .size(22.dp)
+                            .clickable { showCategories = true },
+                    )
+                    Spacer(Modifier.width(IzSpacing.xs))
+                }
+                Text(
+                    stringResource(R.string.zap_category).uppercase(),
+                    color = IzColor.TextSecondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp,
+                )
+            }
             Text(
                 categoryLabel.uppercase(),
                 color = IzColor.Primary,
@@ -195,6 +215,68 @@ fun ZappingBody(
             }
             Spacer(Modifier.height(IzSpacing.sm))
 
+            if (showCategories && onSelectCategory != null) {
+                // Painel retrátil de categorias (padrão V2): título + X,
+                // linhas nome+contagem, selecionada em vermelho.
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        stringResource(R.string.zap_categories),
+                        color = IzColor.TextPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = null,
+                        tint = IzColor.TextSecondary,
+                        modifier = Modifier
+                            .size(22.dp)
+                            .clickable { showCategories = false },
+                    )
+                }
+                Spacer(Modifier.height(IzSpacing.sm))
+                LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    items(categories.size, key = { categories[it].first }) { idx ->
+                        val (catId, catName) = categories[idx]
+                        val isSel = catId == selectedCategoryId
+                        val catInteraction = rememberIzInteractionSource()
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(44.dp)
+                                .izFocusVisuals(catInteraction, shape = RoundedCornerShape(IzRadius.sm), focusedScale = 1.02f)
+                                .clip(RoundedCornerShape(IzRadius.sm))
+                                .background(if (isSel) IzColor.RowSelected else Color.Transparent)
+                                .clickable(interactionSource = catInteraction, indication = null) {
+                                    onSelectCategory(catId)
+                                    showCategories = false
+                                }
+                                .padding(horizontal = IzSpacing.xs),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                catName.uppercase(),
+                                color = if (isSel) IzColor.Primary else IzColor.TextSecondary,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Text(
+                                (categoryCounts[catId] ?: 0).toString(),
+                                color = if (isSel) IzColor.Primary else IzColor.Muted,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
+                }
+            } else {
             LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 items(filtered, key = { it.id }) { row ->
                     ChannelRow(
@@ -204,6 +286,7 @@ fun ZappingBody(
                         onClick = { selected = row },
                     )
                 }
+            }
             }
 
             Text(

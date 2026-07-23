@@ -116,6 +116,7 @@ private const val ARG_PLAYLIST_ID = "playlistId"
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val navContext = androidx.compose.ui.platform.LocalContext.current
     val lastPlaylistStore = LocalLastPlaylistStore.current
     val playlistRepository = LocalPlaylistRepository.current
     val scope = rememberCoroutineScope()
@@ -152,24 +153,18 @@ fun AppNavigation() {
                 val savedId = lastPlaylistStore.read()
                 val match = savedId?.let { id -> list.firstOrNull { it.id == id } }
                 if (savedId != null && match == null) lastPlaylistStore.clear()
-                // A lista de playlists fica SEMPRE na base da pilha — igual ao
-                // comportamento original do Another: voltar do dashboard leva à
-                // lista, não para fora do app. As duas navegações ocorrem no
-                // mesmo frame, então a lista não chega a aparecer.
-                navController.navigate(Routes.PLAYLISTS) {
+                // Fluxo V2: a tela de Playlists NÃO participa do fluxo.
+                // Dashboard (ou login) é a raiz — voltar SAI do aplicativo.
+                // A rota continua existindo apenas como reserva técnica.
+                val target = when {
+                    match != null -> Routes.dashboard(match.id)
+                    list.isEmpty() -> Routes.xtream()
+                    // Há listas mas nenhuma salva como última: usa a primeira.
+                    else -> Routes.dashboard(list.first().id)
+                }
+                navController.navigate(target) {
                     popUpTo(Routes.SPLASH) { inclusive = true }
                     launchSingleTop = true
-                }
-                when {
-                    match != null -> navController.navigate(Routes.dashboard(match.id)) {
-                        launchSingleTop = true
-                    }
-                    // Fluxo V2: sem nenhuma playlist, o app abre DIRETO no
-                    // login (usuário/senha). A lista de gerenciamento fica
-                    // escondida por baixo — acessível pelo voltar.
-                    list.isEmpty() -> navController.navigate(Routes.xtream()) {
-                        launchSingleTop = true
-                    }
                 }
             }
         }
@@ -553,14 +548,16 @@ fun AppNavigation() {
             },
         ) { backStackEntry ->
             AddXtreamPlaylistScreen(
-                onCancel = { navController.popBackStack() },
+                onCancel = {
+                    // Quando o login é a raiz (sem playlists), fechar sai do app.
+                    if (!navController.popBackStack()) {
+                        (navContext as? android.app.Activity)?.finish()
+                    }
+                },
                 onSaved = { playlistId ->
-                    // Jump straight to the dashboard so the user can see the
-                    // freshly-synced catalog — the modal slides away under
-                    // the dashboard transition. The playlists list stays in
-                    // the back stack so pressing Back returns there.
+                    // O dashboard vira a RAIZ — voltar sai do app (fluxo V2).
                     navController.navigate(Routes.dashboard(playlistId)) {
-                        popUpTo(Routes.PLAYLISTS) { inclusive = false }
+                        popUpTo(0) { inclusive = true }
                         launchSingleTop = true
                     }
                 },

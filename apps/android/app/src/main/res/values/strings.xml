@@ -36,6 +36,7 @@
     <string name="kicker_live">AO VIVO</string>
     <string name="kicker_foryou">Para você</string>
     <!-- Zapping (lista + prévia) -->
+    <string name="zap_categories">Categorias</string>
     <string name="zap_category">Categoria</string>
     <string name="zap_search_channel">Buscar canal…</string>
     <string name="zap_channels_count">%1$d canais</string>
