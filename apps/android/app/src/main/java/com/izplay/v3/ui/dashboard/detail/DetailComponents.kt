@@ -461,7 +461,7 @@ fun DetailPlotBlock(plot: String, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
-            text = "Konu",
+            text = "Sinopse",
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
         )
@@ -474,7 +474,7 @@ fun DetailPlotBlock(plot: String, modifier: Modifier = Modifier) {
         )
         AnimatedVisibility(visible = canExpand) {
             Text(
-                text = if (expanded) "Daha az" else "Daha fazla",
+                text = if (expanded) "Mostrar menos" else "Ler mais",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary,

@@ -52,6 +52,7 @@ fun ContinueWatchingShelf(
     onResumeMovie: (streamId: Int) -> Unit,
     onResumeSeries: (episodeId: String) -> Unit,
     onPlayLive: (streamId: Int) -> Unit,
+    contentType: String? = null,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -61,7 +62,22 @@ fun ContinueWatchingShelf(
         .observeRecent(playlistId, limit = 20)
         .collectAsState(initial = emptyList())
 
-    if (rows.isEmpty()) return
+    val resumableRows = rows
+        .filter { row ->
+            val supportedType = row.type == "vod" || row.type == "series"
+            val requestedType = contentType == null || row.type == contentType
+            val hasUsefulProgress = row.durationMs > 0L &&
+                row.lastTimeMs > 5_000L &&
+                row.lastTimeMs < row.durationMs - 30_000L
+            supportedType && requestedType && hasUsefulProgress
+        }
+        // Uma série aparece uma única vez, apontando para o episódio mais
+        // recente (a consulta já vem ordenada por lastWatchedAt DESC).
+        .distinctBy { row ->
+            if (row.type == "series") "series:${row.seriesId ?: row.id}" else row.id
+        }
+
+    if (resumableRows.isEmpty()) return
 
     Column(modifier = modifier.fillMaxWidth().padding(top = 8.dp)) {
         Text(
@@ -73,12 +89,11 @@ fun ContinueWatchingShelf(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            items(rows, key = { it.id }) { row ->
+            items(resumableRows, key = { it.id }) { row ->
                 ContinueWatchingCard(row = row, onClick = {
                     when (row.type) {
                         "vod" -> row.streamId.toIntOrNull()?.let(onResumeMovie)
                         "series" -> onResumeSeries(row.streamId)
-                        "live" -> row.streamId.toIntOrNull()?.let(onPlayLive)
                     }
                 })
             }

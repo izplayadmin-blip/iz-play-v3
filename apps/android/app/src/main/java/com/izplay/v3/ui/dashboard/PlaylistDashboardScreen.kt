@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -50,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -61,8 +66,20 @@ import com.izplay.v3.model.Playlist
 import com.izplay.v3.ui.LocalPlaylistContentStore
 import com.izplay.v3.ui.LocalPlaylistRepository
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.izplay.v3.ui.design.IzTheme
 import com.izplay.v3.ui.design.components.IzNavDestination
 import com.izplay.v3.ui.design.components.IzSidebar
@@ -104,10 +121,12 @@ fun PlaylistDashboardScreen(
     onOpenHistory: () -> Unit = {},
     onOpenSearch: () -> Unit = {},
     onResumeEpisode: (episodeId: String) -> Unit = {},
+    onOpenProfiles: () -> Unit = {},
 ) {
     val repository = LocalPlaylistRepository.current
     val store = LocalPlaylistContentStore.current
     val scope = rememberCoroutineScope()
+    val isMobile = LocalConfiguration.current.screenWidthDp < 600
 
     var playlist by remember(playlistId) { mutableStateOf<Playlist?>(null) }
     LaunchedEffect(playlistId) {
@@ -148,6 +167,7 @@ fun PlaylistDashboardScreen(
 
     IzTheme {
     Row(Modifier.fillMaxSize()) {
+    if (!isMobile) {
     IzSidebar(
         destinations = listOf(
             IzNavDestination("home", stringResource(com.izplay.v3.R.string.screen_home), Icons.Default.Home),
@@ -195,12 +215,62 @@ fun PlaylistDashboardScreen(
             }
         },
     )
+    }
     Scaffold(
+        bottomBar = {
+            if (isMobile) {
+                NavigationBar(containerColor = Color(0xFF090909)) {
+                    val selectedAccent = Color(0xFFE52235)
+                    NavigationBarItem(
+                        selected = pagerState.currentPage == PAGE_HOME,
+                        onClick = { scope.launch { pagerState.animateScrollToPage(PAGE_HOME) } },
+                        icon = { Icon(Icons.Default.Home, contentDescription = "Início") },
+                        label = { Text("Início", maxLines = 1, fontSize = 10.sp) },
+                        colors = mobileNavigationColors(selectedAccent),
+                    )
+                    NavigationBarItem(
+                        selected = pagerState.currentPage == PAGE_FAVORITES,
+                        onClick = { scope.launch { pagerState.animateScrollToPage(PAGE_FAVORITES) } },
+                        icon = { Icon(Icons.Default.StarBorder, contentDescription = "Favoritos") },
+                        label = { Text("Favoritos", maxLines = 1, fontSize = 10.sp) },
+                        colors = mobileNavigationColors(selectedAccent),
+                    )
+                    val catalogItems = listOf(
+                        Triple(0, Icons.Default.LiveTv, "Canais de TV"),
+                        Triple(1, Icons.Default.Movie, "Filmes"),
+                        Triple(2, Icons.Default.Tv, "Séries de TV"),
+                    )
+                    catalogItems.forEach { (page, icon, label) ->
+                        NavigationBarItem(
+                            selected = pagerState.currentPage == page,
+                            onClick = { scope.launch { pagerState.animateScrollToPage(page) } },
+                            icon = { Icon(icon, contentDescription = label) },
+                            label = { Text(label, maxLines = 1, fontSize = 10.sp) },
+                            colors = mobileNavigationColors(selectedAccent),
+                        )
+                    }
+                }
+            }
+        },
         topBar = {
+            if (isMobile) {
+                Surface(color = Color.Black) {
+                    Box(
+                        Modifier
+                            .statusBarsPadding()
+                            .padding(horizontal = 18.dp, vertical = 6.dp),
+                    ) {
+                        MobileIzTopBar(
+                            onSearch = onOpenSearch,
+                            onProfile = onOpenProfiles,
+                        )
+                    }
+                }
+            }
             // A Home (Início) não tem top bar: ela é o destino principal —
             // sidebar indica a seção e o Hero é o elemento dominante. As
             // outras abas mantêm a barra (voltar/busca/categorias/refresh).
-            if (pagerState.currentPage != PAGE_HOME && pagerState.currentPage != 0) {
+            if (!isMobile && pagerState.currentPage != PAGE_HOME && pagerState.currentPage != 0) {
             TopAppBar(
                 title = {
                     val tabTitleId = TAB_TITLE_IDS.getOrNull(pagerState.currentPage)
@@ -287,15 +357,27 @@ fun PlaylistDashboardScreen(
                     userScrollEnabled = false,
                 ) { page ->
                     when (page) {
-                        0 -> LiveTabBody(
-                            playlistId = playlistId,
-                            categories = liveCats,
-                            byCategoryId = liveByCategory,
-                            zapCategoryId = liveZapCategoryId,
-                            onPickCategory = { pickerType = "live" },
-                            onSelectZapCategory = { liveZapCategoryId = it },
-                            onPlayChannel = onPlayLive,
-                        )
+                        0 -> if (isMobile) {
+                            MobileLiveTab(
+                                playlistId = playlistId,
+                                categories = liveCats,
+                                byCategoryId = liveByCategory,
+                                selectedCategoryId = liveZapCategoryId,
+                                onSearch = onOpenSearch,
+                                onPickCategory = { pickerType = "live" },
+                                onPlayChannel = onPlayLive,
+                            )
+                        } else {
+                            LiveTabBody(
+                                playlistId = playlistId,
+                                categories = liveCats,
+                                byCategoryId = liveByCategory,
+                                zapCategoryId = liveZapCategoryId,
+                                onPickCategory = { pickerType = "live" },
+                                onSelectZapCategory = { liveZapCategoryId = it },
+                                onPlayChannel = onPlayLive,
+                            )
+                        }
                         1 -> MoviesTabBody(
                             playlistId = playlistId,
                             categories = vodCats,
@@ -306,6 +388,8 @@ fun PlaylistDashboardScreen(
                             onResumeMovie = onOpenMovie,
                             onResumeEpisode = onResumeEpisode,
                             onPlayLive = onPlayLive,
+                            onOpenSearch = onOpenSearch,
+                            onOpenCategories = { pickerType = "vod" },
                         )
                         2 -> SeriesTabBody(
                             playlistId = playlistId,
@@ -317,6 +401,8 @@ fun PlaylistDashboardScreen(
                             onResumeMovie = onOpenMovie,
                             onResumeEpisode = onResumeEpisode,
                             onPlayLive = onPlayLive,
+                            onOpenSearch = onOpenSearch,
+                            onOpenCategories = { pickerType = "series" },
                         )
                         3 -> com.izplay.v3.ui.settings.PlaylistSettingsBody(
                             playlistId = playlistId,
@@ -343,6 +429,14 @@ fun PlaylistDashboardScreen(
                             },
                             seriesByCategory = seriesByCategory,
                             liveByCategory = liveByCategory,
+                            onOpenProfiles = onOpenProfiles,
+                        )
+                        PAGE_FAVORITES -> com.izplay.v3.ui.favorites.UnifiedFavoritesBody(
+                            playlistId = playlistId,
+                            onOpenMovie = onOpenMovie,
+                            onOpenSeries = onOpenSeries,
+                            onPlayLive = onPlayLive,
+                            onSearch = onOpenSearch,
                         )
                     }
                 }
@@ -383,7 +477,8 @@ fun PlaylistDashboardScreen(
 
 /** Página da Home (Início) no pager — depois das abas herdadas. */
 private const val PAGE_HOME = 5
-private const val TAB_COUNT = 6
+private const val PAGE_FAVORITES = 6
+private const val TAB_COUNT = 7
 
 /** Relógio HH:mm da sidebar (java.time coberto pelo desugaring no API 24/25). */
 private fun clockNow(): String =
@@ -400,6 +495,16 @@ private val TAB_TITLE_IDS = intArrayOf(
 )
 // Settings (3) and Search (4) hide the content-tab top-bar actions.
 private const val CONTENT_TAB_LIMIT = 3
+
+@Composable
+private fun mobileNavigationColors(selectedAccent: Color) =
+    androidx.compose.material3.NavigationBarItemDefaults.colors(
+        selectedIconColor = selectedAccent,
+        selectedTextColor = selectedAccent,
+        indicatorColor = Color.Transparent,
+        unselectedIconColor = Color(0xFF8C8C8C),
+        unselectedTextColor = Color(0xFF8C8C8C),
+    )
 
 /** Index → iOS-compatible type discriminator. */
 private fun tabTypeFor(page: Int): String = when (page) {
@@ -471,6 +576,153 @@ private fun LiveTabBody(
 private const val FAV_CATEGORY_ID = "__izplay_favorites__"
 
 @Composable
+private fun MobileLiveTab(
+    playlistId: String,
+    categories: List<CategoryEntity>,
+    byCategoryId: Map<String, List<LiveStreamWithCategory>>,
+    selectedCategoryId: String?,
+    onSearch: () -> Unit,
+    onPickCategory: () -> Unit,
+    onPlayChannel: (Int) -> Unit,
+) {
+    val favoriteRepository = com.izplay.v3.ui.LocalFavoriteRepository.current
+    val favoriteChannels by favoriteRepository.observeLive(playlistId)
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+    val favoriteIds = remember(favoriteChannels) {
+        favoriteChannels.mapTo(hashSetOf()) { it.stream.streamId }
+    }
+    val scope = rememberCoroutineScope()
+    val selected = categories.firstOrNull { it.id == selectedCategoryId }
+    val streams = remember(byCategoryId, selectedCategoryId) {
+        if (selectedCategoryId == null) {
+            byCategoryId.values.flatten()
+        } else {
+            byCategoryId[selectedCategoryId].orEmpty()
+        }
+    }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentPadding = PaddingValues(bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item(key = "live-mobile-header") {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 14.dp),
+            ) {
+                Spacer(Modifier.height(26.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        "Canais de TV",
+                        color = Color.White,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFF181818))
+                            .clickable(onClick = onPickCategory)
+                            .padding(horizontal = 18.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Text(
+                            selected?.name ?: "Todos",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Categorias", tint = Color.White)
+                    }
+                }
+            }
+        }
+        items(streams, key = { "mobile_live_${it.stream.streamId}" }) { row ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFF171717))
+                    .clickable { onPlayChannel(row.stream.streamId) }
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(74.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFF1F1F1)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (!row.stream.streamIcon.isNullOrBlank()) {
+                        AsyncImage(
+                            model = row.stream.streamIcon,
+                            contentDescription = row.stream.name,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize().padding(8.dp),
+                        )
+                    } else {
+                        Text(
+                            row.stream.name.take(3).uppercase(),
+                            color = Color(0xFF222222),
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        row.stream.name,
+                        color = Color.White,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "Sem informações sobre o programa atual",
+                        color = Color(0xFF999999),
+                        fontSize = 14.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        scope.launch {
+                            favoriteRepository.toggle(
+                                streamId = row.stream.streamId,
+                                playlistId = playlistId,
+                                type = com.izplay.v3.data.FavoriteRepository.Type.LIVE,
+                            )
+                        }
+                    },
+                ) {
+                    val favorite = row.stream.streamId in favoriteIds
+                    Icon(
+                        imageVector = if (favorite) Icons.Default.Star else Icons.Default.StarBorder,
+                        contentDescription = if (favorite) "Remover dos favoritos" else "Adicionar aos favoritos",
+                        tint = if (favorite) Color(0xFFFF172B) else Color(0xFFAAAAAA),
+                        modifier = Modifier.size(28.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun MoviesTabBody(
     playlistId: String,
     categories: List<CategoryEntity>,
@@ -481,6 +733,8 @@ private fun MoviesTabBody(
     onResumeMovie: (Int) -> Unit = {},
     onResumeEpisode: (String) -> Unit = {},
     onPlayLive: (Int) -> Unit = {},
+    onOpenSearch: () -> Unit = {},
+    onOpenCategories: () -> Unit = {},
 ) {
     val hiddenStore = com.izplay.v3.ui.LocalHiddenCategoryStore.current
     val hiddenIds by hiddenStore.observeHidden(playlistId, "vod")
@@ -493,15 +747,25 @@ private fun MoviesTabBody(
         return
     }
     LazyColumn(
-        contentPadding = PaddingValues(vertical = 8.dp),
+        contentPadding = PaddingValues(bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        item(key = "mobile-header") {
+            if (LocalConfiguration.current.screenWidthDp < 600) {
+                MobileCatalogHeader(
+                    title = "Filmes",
+                    onSearch = onOpenSearch,
+                    onOpenCategories = onOpenCategories,
+                )
+            }
+        }
         item(key = "continue-watching") {
             ContinueWatchingShelf(
                 playlistId = playlistId,
                 onResumeMovie = onResumeMovie,
                 onResumeSeries = onResumeEpisode,
                 onPlayLive = onPlayLive,
+                contentType = "vod",
             )
         }
         item(key = "recently-added") {
@@ -547,6 +811,8 @@ private fun SeriesTabBody(
     onResumeMovie: (Int) -> Unit = {},
     onResumeEpisode: (String) -> Unit = {},
     onPlayLive: (Int) -> Unit = {},
+    onOpenSearch: () -> Unit = {},
+    onOpenCategories: () -> Unit = {},
 ) {
     val hiddenStore = com.izplay.v3.ui.LocalHiddenCategoryStore.current
     val hiddenIds by hiddenStore.observeHidden(playlistId, "series")
@@ -559,15 +825,25 @@ private fun SeriesTabBody(
         return
     }
     LazyColumn(
-        contentPadding = PaddingValues(vertical = 8.dp),
+        contentPadding = PaddingValues(bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        item(key = "mobile-header") {
+            if (LocalConfiguration.current.screenWidthDp < 600) {
+                MobileCatalogHeader(
+                    title = "Séries",
+                    onSearch = onOpenSearch,
+                    onOpenCategories = onOpenCategories,
+                )
+            }
+        }
         item(key = "continue-watching") {
             ContinueWatchingShelf(
                 playlistId = playlistId,
                 onResumeMovie = onResumeMovie,
                 onResumeSeries = onResumeEpisode,
                 onPlayLive = onPlayLive,
+                contentType = "series",
             )
         }
         items(visibleCategories, key = { "series_${it.id}" }) { category ->
@@ -591,6 +867,49 @@ private fun SeriesTabBody(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MobileCatalogHeader(
+    title: String,
+    onSearch: () -> Unit,
+    onOpenCategories: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 20.dp),
+    ) {
+        Spacer(Modifier.height(28.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                title,
+                color = Color.White,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f),
+            )
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xFF171717))
+                    .clickable(onClick = onOpenCategories)
+                    .padding(horizontal = 18.dp, vertical = 13.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text("Categorias", color = Color.White, fontSize = 16.sp)
+                Icon(
+                    Icons.Default.KeyboardArrowDown,
+                    contentDescription = "Abrir categorias",
+                    tint = Color.White,
+                )
             }
         }
     }

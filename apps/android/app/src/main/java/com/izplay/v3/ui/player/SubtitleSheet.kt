@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -49,7 +50,14 @@ fun SubtitleAppearanceSheet(
     var settings by remember { mutableStateOf(store.load()) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = Color(0xFF101010),
+        contentColor = Color.White,
+        scrimColor = Color.Black.copy(alpha = 0.72f),
+        dragHandle = null,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

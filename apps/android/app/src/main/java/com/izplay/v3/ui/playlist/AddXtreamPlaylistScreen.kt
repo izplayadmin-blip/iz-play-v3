@@ -59,6 +59,7 @@ import com.izplay.v3.ui.design.IzTheme
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -224,7 +225,7 @@ fun AddXtreamPlaylistScreen(
     // ===== Apresentação: login fiel ao SetupScreen do IZ Play V2 Android =====
     ModalSlideContainer {
         IzTheme {
-        Box(
+        BoxWithConstraints(
             Modifier
                 .fillMaxSize()
                 .background(
@@ -237,6 +238,7 @@ fun AddXtreamPlaylistScreen(
                 ),
             contentAlignment = Alignment.Center,
         ) {
+            val mobile = maxWidth < 600.dp
             IconButton(
                 onClick = onCancel,
                 enabled = !isSaving,
@@ -245,7 +247,18 @@ fun AddXtreamPlaylistScreen(
                 Icon(Icons.Default.Close, contentDescription = "Cancel", tint = IzColor.TextSecondary)
             }
 
-            Row(
+            if (mobile) {
+                MobileLoginContent(
+                    username = username,
+                    password = password,
+                    passwordVisible = passwordVisible,
+                    enabled = isValid && !isSaving,
+                    onUsernameChange = { username = it },
+                    onPasswordChange = { password = it },
+                    onTogglePassword = { passwordVisible = !passwordVisible },
+                    onLogin = ::save,
+                )
+            } else Row(
                 Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 72.dp),
@@ -355,6 +368,103 @@ fun AddXtreamPlaylistScreen(
             )
         }
         }
+    }
+}
+
+@Composable
+private fun MobileLoginContent(
+    username: String,
+    password: String,
+    passwordVisible: Boolean,
+    enabled: Boolean,
+    onUsernameChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onTogglePassword: () -> Unit,
+    onLogin: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.Start,
+    ) {
+        Spacer(Modifier.height(76.dp))
+        Image(
+            painter = painterResource(com.izplay.v3.R.drawable.izplay_logo),
+            contentDescription = "IZ Play",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(112.dp),
+        )
+        Spacer(Modifier.height(62.dp))
+        Text("Bem-vindo", color = Color.White, fontSize = 38.sp, fontWeight = FontWeight.Black)
+        Spacer(Modifier.height(4.dp))
+        Text("Entre para assistir!", color = IzColor.TextSecondary, fontSize = 22.sp)
+        Spacer(Modifier.height(44.dp))
+        MobileUnderlineField(
+            value = username,
+            placeholder = "Login",
+            onValueChange = onUsernameChange,
+        )
+        Spacer(Modifier.height(24.dp))
+        MobileUnderlineField(
+            value = password,
+            placeholder = "Senha",
+            password = true,
+            passwordVisible = passwordVisible,
+            onTogglePassword = onTogglePassword,
+            onValueChange = onPasswordChange,
+        )
+        Spacer(Modifier.height(34.dp))
+        IzEntrarButton(enabled = enabled, onClick = onLogin)
+        Spacer(Modifier.height(110.dp))
+        Text(
+            "IZ Play Mobile  •  ${com.izplay.v3.BuildConfig.VERSION_NAME}",
+            color = IzColor.TextSecondary,
+            fontSize = 13.sp,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+        )
+        Spacer(Modifier.height(30.dp))
+    }
+}
+
+@Composable
+private fun MobileUnderlineField(
+    value: String,
+    placeholder: String,
+    password: Boolean = false,
+    passwordVisible: Boolean = false,
+    onTogglePassword: () -> Unit = {},
+    onValueChange: (String) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
+                textStyle = TextStyle(color = Color.White, fontSize = 20.sp),
+                cursorBrush = SolidColor(IzColor.Primary),
+                visualTransformation = if (password && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
+                decorationBox = { inner ->
+                    if (value.isEmpty()) Text(placeholder, color = IzColor.TextSecondary, fontSize = 20.sp)
+                    inner()
+                },
+                modifier = Modifier.weight(1f),
+            )
+            if (password) {
+                IconButton(onClick = onTogglePassword) {
+                    Icon(
+                        if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                        contentDescription = "Mostrar senha",
+                        tint = Color.White,
+                    )
+                }
+            }
+        }
+        Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.75f)))
     }
 }
 

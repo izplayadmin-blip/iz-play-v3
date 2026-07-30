@@ -19,6 +19,11 @@
 .env.local
 .env.*.local
 
+# Local QA evidence and generated packages
+/.icon-compare/
+/*.png
+/*.apk
+
 # Node / docs (vitepress)
 node_modules/
 docs/.vitepress/cache/

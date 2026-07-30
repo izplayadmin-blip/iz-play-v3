@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">IZ Play</string>
+    <string name="app_name">IZ Play Mobile</string>
 
     <!-- Common controls -->
     <string name="common_back">Geri</string>
@@ -233,7 +233,7 @@
     <string name="external_player_not_found">Video oynatabilen bir uygulama bulunamadı (VLC, MX Player vb.).</string>
 
     <!-- Errors -->
-    <string name="error_server_unreachable">Sunucuya ulaşılamıyor.</string>
+    <string name="error_server_unreachable">Bu içerik oynatılamadı.</string>
     <string name="error_timeout">Bağlantı zaman aşımına uğradı.</string>
     <string name="error_player_init">Oynatıcı başlatılamadı.</string>
     <string name="error_generic">Bir şeyler ters gitti.</string>

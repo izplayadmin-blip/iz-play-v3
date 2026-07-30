@@ -1,5 +1,6 @@
 package com.izplay.v3.ui.player
 
+import android.content.pm.ActivityInfo
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -90,6 +91,13 @@ fun PlayerScreen(
     onPlayNextEpisode: (episodeId: String) -> Unit = {},
 ) {
     val context = LocalContext.current
+    val activity = context.findActivity()
+    DisposableEffect(Unit) {
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        onDispose {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+    }
     val app = context.applicationContext as IZPlayApp
     val vm: PlayerViewModel = viewModel(
         factory = PlayerViewModel.factory(app, playlistId, streamRef, kind),
@@ -118,8 +126,6 @@ fun PlayerScreen(
     val duration by player.duration.collectAsState()
     val isSeekable by player.isSeekable.collectAsState()
     val failureMessage by player.playbackFailureMessage.collectAsState()
-    val recentLogs by player.recentMpvLogs.collectAsState()
-
     val videoTracks by player.videoTracks.collectAsState()
     val audioTracks by player.audioTracks.collectAsState()
     val subtitleTracks by player.subtitleTracks.collectAsState()
@@ -315,36 +321,34 @@ fun PlayerScreen(
         // single localized message and drop the log dump.
         val combinedError = resolveError ?: failureMessage
         if (combinedError != null) {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color(0xCC000000))
                     .systemBarsPadding()
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = combinedError,
-                    color = Color.White,
-                    fontSize = 16.sp,
-                )
-                if (recentLogs.isNotEmpty()) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
                     Text(
-                        text = stringResource(R.string.player_mpv_recent_logs, recentLogs.size),
-                        color = Color(0xCCFFFFFF),
-                        fontSize = 12.sp,
+                        text = stringResource(R.string.player_playback_unavailable),
+                        color = Color.White,
+                        fontSize = 18.sp,
                     )
-                    LazyColumn(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                    ) {
-                        items(recentLogs) { line ->
-                            Text(
-                                text = line,
-                                color = Color(0xDDFFFFFF),
-                                fontSize = 10.sp,
-                            )
-                        }
+                    Text(
+                        text = stringResource(R.string.player_try_again_later),
+                        color = Color(0xFFAAAAAA),
+                        fontSize = 14.sp,
+                    )
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_back),
+                            tint = Color.White,
+                        )
                     }
                 }
             }
@@ -506,7 +510,7 @@ private fun PlayerOverlay(
 }
 
 @Composable
-private fun PlayerInitErrorScreen(message: String, onBack: () -> Unit) {
+private fun PlayerInitErrorScreen(@Suppress("UNUSED_PARAMETER") message: String, onBack: () -> Unit) {
     BackHandler { onBack() }
     Box(
         modifier = Modifier
@@ -521,9 +525,14 @@ private fun PlayerInitErrorScreen(message: String, onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = message,
+                text = stringResource(R.string.player_playback_unavailable),
                 color = Color.White,
-                fontSize = 16.sp,
+                fontSize = 18.sp,
+            )
+            Text(
+                text = stringResource(R.string.player_try_again_later),
+                color = Color(0xFFAAAAAA),
+                fontSize = 14.sp,
             )
             IconButton(onClick = onBack) {
                 Icon(
@@ -551,7 +560,14 @@ private fun TracksSheet(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = Color(0xFF101010),
+        contentColor = Color.White,
+        scrimColor = Color.Black.copy(alpha = 0.72f),
+        dragHandle = null,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -603,7 +619,7 @@ private fun TrackSection(
             Icon(
                 icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = Color.White,
                 modifier = Modifier.size(20.dp),
             )
             Spacer(Modifier.width(8.dp))
@@ -624,21 +640,21 @@ private fun TrackSection(
                         text = track.title,
                         style = MaterialTheme.typography.bodyLarge,
                         color = if (track.id == selectedId) {
-                            MaterialTheme.colorScheme.primary
+                            Color.White
                         } else {
-                            MaterialTheme.colorScheme.onSurface
+                            Color(0xFFAAAAAA)
                         },
                     )
                     track.detail?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = Color(0xFF777777),
                         )
                     }
                 }
                 if (track.id == selectedId) {
-                    Text("✓", color = MaterialTheme.colorScheme.primary)
+                    Text("✓", color = Color.White)
                 }
             }
         }

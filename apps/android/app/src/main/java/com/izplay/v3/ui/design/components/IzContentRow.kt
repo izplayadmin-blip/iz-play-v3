@@ -20,6 +20,7 @@ import com.izplay.v3.ui.design.tokens.IzColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalConfiguration
 import com.izplay.v3.ui.design.tokens.IzSpacing
 import com.izplay.v3.ui.design.tokens.IzType
 
@@ -40,6 +41,7 @@ fun <T> IzContentRow(
     onSeeMore: (() -> Unit)? = null,
     itemContent: @Composable (T) -> Unit,
 ) {
+    val mobile = LocalConfiguration.current.screenWidthDp < 600
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -47,14 +49,22 @@ fun <T> IzContentRow(
                 .padding(bottom = IzSpacing.md),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(title, style = IzType.Subtitle.copy(fontSize = 26.sp), color = IzColor.TextPrimary)
+            Text(
+                title,
+                style = IzType.Subtitle.copy(fontSize = if (mobile) 20.sp else 26.sp),
+                color = IzColor.TextPrimary,
+                modifier = Modifier.weight(1f, fill = false),
+            )
             if (kicker != null) {
                 Text(
                     kicker.uppercase(),
-                    style = IzType.Caption.copy(fontSize = 13.sp, letterSpacing = 2.sp),
+                    style = IzType.Caption.copy(
+                        fontSize = if (mobile) 12.sp else 13.sp,
+                        letterSpacing = if (mobile) 0.5.sp else 2.sp,
+                    ),
                     color = IzColor.Live,
                     fontWeight = FontWeight.Black,
-                    modifier = Modifier.padding(start = IzSpacing.sm),
+                    modifier = Modifier.padding(start = if (mobile) 12.dp else IzSpacing.sm),
                 )
             }
             if (onSeeMore != null) {

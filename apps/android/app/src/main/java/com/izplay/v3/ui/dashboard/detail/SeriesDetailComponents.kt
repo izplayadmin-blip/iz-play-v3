@@ -71,7 +71,7 @@ fun SeasonTabBar(
                 MaterialTheme.colorScheme.onSurface
             }
             Text(
-                text = season.name ?: "Sezon ${season.seasonNumber}",
+                text = season.name ?: "Temporada ${season.seasonNumber}",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = labelColor,

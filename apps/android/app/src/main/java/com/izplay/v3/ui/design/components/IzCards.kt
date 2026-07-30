@@ -22,6 +22,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -51,10 +53,11 @@ fun IzTvCard(
     badge: (@Composable () -> Unit)? = null,
     progress: Float? = null,
 ) {
+    val mobile = LocalConfiguration.current.screenWidthDp < 600
     val interaction = rememberIzInteractionSource()
     val shape = RoundedCornerShape(IzRadius.card)
 
-    Column(modifier = modifier.width(IzSize.cardWidth)) {
+    Column(modifier = modifier.width(if (mobile) 156.dp else IzSize.cardWidth)) {
         Box(
             Modifier
                 .fillMaxWidth()
@@ -79,7 +82,7 @@ fun IzTvCard(
         }
         Text(
             title,
-            style = IzType.Card,
+            style = IzType.Card.copy(fontSize = if (mobile) 13.sp else IzType.Card.fontSize),
             color = IzColor.TextPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -109,10 +112,11 @@ fun IzPosterCard(
     image: Painter? = null,
     badge: (@Composable () -> Unit)? = null,
 ) {
+    val mobile = LocalConfiguration.current.screenWidthDp < 600
     val interaction = rememberIzInteractionSource()
     val shape = RoundedCornerShape(IzRadius.card)
 
-    Column(modifier = modifier.width(IzSize.posterWidth)) {
+    Column(modifier = modifier.width(if (mobile) 112.dp else IzSize.posterWidth)) {
         Box(
             Modifier
                 .fillMaxWidth()
@@ -129,7 +133,7 @@ fun IzPosterCard(
         }
         Text(
             title,
-            style = IzType.Card,
+            style = IzType.Card.copy(fontSize = if (mobile) 13.sp else IzType.Card.fontSize),
             color = IzColor.TextPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -150,13 +154,15 @@ fun IzChannelCard(
     logo: Painter? = null,
     live: Boolean = false,
 ) {
+    val mobile = LocalConfiguration.current.screenWidthDp < 600
     val interaction = rememberIzInteractionSource()
     val shape = RoundedCornerShape(IzRadius.card)
 
-    Column(modifier = modifier.width(IzSize.channelSize)) {
+    val channelSize = if (mobile) 108.dp else IzSize.channelSize
+    Column(modifier = modifier.width(channelSize)) {
         Box(
             Modifier
-                .size(IzSize.channelSize)
+                .size(channelSize)
                 .izFocusVisuals(interaction, shape = shape)
                 .clip(shape)
                 .background(IzColor.Surface2)
@@ -164,7 +170,12 @@ fun IzChannelCard(
             contentAlignment = Alignment.Center,
         ) {
             if (logo != null) {
-                Image(logo, contentDescription = name, contentScale = ContentScale.Fit, modifier = Modifier.padding(IzSpacing.md).fillMaxSize())
+                Image(
+                    logo,
+                    contentDescription = name,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.padding(if (mobile) 12.dp else IzSpacing.md).fillMaxSize(),
+                )
             } else {
                 Text(name.take(3).uppercase(), style = IzType.Subtitle, color = IzColor.TextSecondary)
             }
@@ -176,7 +187,7 @@ fun IzChannelCard(
         }
         Text(
             name,
-            style = IzType.Description,
+            style = IzType.Description.copy(fontSize = if (mobile) 12.sp else IzType.Description.fontSize),
             color = IzColor.TextPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

@@ -28,6 +28,28 @@ class CredentialRedactorTest {
     }
 
     @Test
+    fun redactsRootXtreamHlsCredentialsIncludingNumericValues() {
+        val redacted = CredentialRedactor.redact(
+            "load http://provider.test/123456/789012/345678.m3u8",
+        )
+        assertEquals(
+            "load http://provider.test/<redacted>/<redacted>/345678.m3u8",
+            redacted,
+        )
+    }
+
+    @Test
+    fun redactsCredentialsMirroredBySwarmCloudLoopback() {
+        val redacted = CredentialRedactor.redact(
+            "load http://127.0.0.1:12345/123456/789012/345678.m3u8",
+        )
+        assertEquals(
+            "load http://127.0.0.1:12345/<redacted>/<redacted>/345678.m3u8",
+            redacted,
+        )
+    }
+
+    @Test
     fun redactsCredentialsInJsonBodies() {
         val redacted = CredentialRedactor.redact(
             "Body: {\"username\": \"alice\", \"password\":\"s3cr3t\", \"status\":\"ok\"}",

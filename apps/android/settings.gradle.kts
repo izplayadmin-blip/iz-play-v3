@@ -16,9 +16,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("https://maven.swarmcloud.net/repository/maven-releases/")
+        }
     }
 }
 
-rootProject.name = "IZPlayV3"
+rootProject.name = "IZPlayMobile"
 include(":app")
- 

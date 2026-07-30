@@ -292,18 +292,26 @@ class PlaylistContentStore(
         // Network fetches first, outside the transaction — long-running I/O
         // and Room write transactions don't mix.
         progress(appContext.getString(R.string.sync_categories))
-        val liveCats = api.getLiveCategories()
-        val vodCats = api.getVODCategories()
-        val seriesCats = api.getSeriesCategories()
+        val (liveCats, vodCats, seriesCats) = kotlinx.coroutines.coroutineScope {
+            val live = async { api.getLiveCategories() }
+            val vod = async { api.getVODCategories() }
+            val series = async { api.getSeriesCategories() }
+            Triple(live.await(), vod.await(), series.await())
+        }
 
         progress(appContext.getString(R.string.sync_live))
-        val liveStreamsApi = api.getLiveStreams()
-
-        progress(appContext.getString(R.string.sync_movies))
-        val vodsApi = api.getVODStreams()
-
-        progress(appContext.getString(R.string.sync_series))
-        val seriesApi = api.getSeries()
+        val (liveStreamsApi, vodsApi, seriesApi) = kotlinx.coroutines.coroutineScope {
+            val live = async { api.getLiveStreams() }
+            val vod = async {
+                progress(appContext.getString(R.string.sync_movies))
+                api.getVODStreams()
+            }
+            val series = async {
+                progress(appContext.getString(R.string.sync_series))
+                api.getSeries()
+            }
+            Triple(live.await(), vod.await(), series.await())
+        }
 
         val filterAdult = playlist.filterAdultContent
         val adultLiveCatIds = if (filterAdult) AdultContentFilter.adultCategoryIds(liveCats) else emptySet()

@@ -44,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.izplay.v3.model.Playlist
@@ -131,13 +130,9 @@ fun MovieDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        text = movie?.name ?: "",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
+                // O título já aparece no bloco de informações do conteúdo.
+                // Mantemos a barra superior somente para voltar e favoritar.
+                title = {},
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri")
@@ -241,7 +236,7 @@ private fun MovieDetailContent(
             primaryTitle = androidx.compose.ui.res.stringResource(com.izplay.v3.R.string.detail_watch),
             onPrimary = { onWatch() },
             primaryIcon = Icons.Default.PlayArrow,
-            trailerTitle = movie.youtubeTrailer.normaliseTrailerUrl()?.let { "Fragman" },
+            trailerTitle = movie.youtubeTrailer.normaliseTrailerUrl()?.let { "Trailer" },
             onTrailer = movie.youtubeTrailer.normaliseTrailerUrl()?.let { url -> { onTrailer(url) } },
         )
 
@@ -257,7 +252,7 @@ private fun MovieDetailContent(
 
         val cast = movie.cast?.trim().orEmpty()
         if (cast.isNotEmpty()) {
-            DetailInfoTextBlock(label = "Oyuncular", value = cast, maxLines = 3)
+            DetailInfoTextBlock(label = "Elenco", value = cast, maxLines = 3)
         }
 
         // Show a hint when playlist hasn't loaded yet (very brief; usually

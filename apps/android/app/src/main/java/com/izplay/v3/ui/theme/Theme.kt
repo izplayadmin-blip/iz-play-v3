@@ -11,9 +11,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
+    primary = androidx.compose.ui.graphics.Color(0xFFE30613),
+    onPrimary = androidx.compose.ui.graphics.Color.White,
+    secondary = androidx.compose.ui.graphics.Color(0xFFFF9800),
+    tertiary = androidx.compose.ui.graphics.Color(0xFFE30613),
+    background = androidx.compose.ui.graphics.Color.Black,
+    onBackground = androidx.compose.ui.graphics.Color.White,
+    surface = androidx.compose.ui.graphics.Color(0xFF0B0B0B),
+    onSurface = androidx.compose.ui.graphics.Color.White,
+    surfaceVariant = androidx.compose.ui.graphics.Color(0xFF191919),
+    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFFAAAAAA),
+    outline = androidx.compose.ui.graphics.Color(0xFF333333),
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -24,9 +32,9 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun IZPlayTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {

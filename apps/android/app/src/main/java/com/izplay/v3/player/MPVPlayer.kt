@@ -153,10 +153,15 @@ class MPVPlayer(context: Context) {
 
     private data class PendingLoad(
         val url: String,
+        val directFallbackUrl: String?,
         val play: Boolean,
         val startSeconds: Double?,
         val liveLowLatency: Boolean,
     )
+    /** The current local-proxy load, retained until playback succeeds or falls back. */
+    @Volatile private var activeLoad: PendingLoad? = null
+    /** Ensures a failed local proxy can trigger at most one direct retry. */
+    private val directFallbackScheduled = AtomicBoolean(false)
 
     // Declared before `init` so `MPVLib.setEventListener(handle, eventListener)`
     // below sees a fully-constructed object. The listener has no construction
@@ -180,6 +185,7 @@ class MPVPlayer(context: Context) {
             playbackPipelinePrimed = false
             _isPlaybackEstablished.value = false
             if (reason == MPVLib.EndFileReason.ERROR) {
+                if (scheduleDirectFallbackIfAvailable()) return
                 publishEndFileFailureMessage(error)
             }
         }
@@ -303,11 +309,19 @@ class MPVPlayer(context: Context) {
      */
     fun load(
         url: String,
+        directFallbackUrl: String? = null,
         play: Boolean = true,
         startSeconds: Double? = null,
         liveLowLatency: Boolean = false,
     ) = onMpvQueue {
-        val req = PendingLoad(url, play, startSeconds, liveLowLatency)
+        directFallbackScheduled.set(false)
+        val req = PendingLoad(
+            url = url,
+            directFallbackUrl = directFallbackUrl?.takeIf { it != url },
+            play = play,
+            startSeconds = startSeconds,
+            liveLowLatency = liveLowLatency,
+        )
         if (!hasSurface) {
             // Defer: mpv will be told to loadfile the moment the SurfaceView
             // hands us its Surface. Without this guard `gpu-context=android`
@@ -321,6 +335,7 @@ class MPVPlayer(context: Context) {
     }
 
     private fun applyLoadNow(req: PendingLoad) {
+        activeLoad = req
         clearPlaybackFailure()
         cancelLoadTimeoutWatchdog()
         playbackPipelinePrimed = false
@@ -669,18 +684,10 @@ class MPVPlayer(context: Context) {
             _recentMpvLogs.value = next
         }
 
-        if (playbackPipelinePrimed) return
-        if (!shouldSurfaceLogAsPlaybackFailure(level, prefix, text)) return
-
-        cancelLoadTimeoutWatchdog()
-        val msg = userFacingMessageFromLogLine(level, text)
-        if (_playbackFailureMessage.value == null) {
-            _playbackFailureMessage.value = msg
-        }
-        Log.i(
-            TAG,
-            CredentialRedactor.redact("surfaced failure: [$level] $prefix: $text → $msg"),
-        )
+        // Uma linha de log não representa falha terminal. HLS, P2P e o
+        // fallback direto podem registrar erros temporários e ainda estabelecer
+        // a reprodução. A UI recebe falha apenas por END_FILE(ERROR), depois de
+        // esgotar o fallback, ou pelo watchdog de carregamento.
     }
 
     private fun shouldSurfaceLogAsPlaybackFailure(
@@ -781,10 +788,32 @@ class MPVPlayer(context: Context) {
         cancelLoadTimeoutWatchdog()
         loadTimeoutFuture = mpvQueue.schedule({
             if (isDisposed.get() || playbackPipelinePrimed) return@schedule
+            if (scheduleDirectFallbackIfAvailable()) return@schedule
             if (_playbackFailureMessage.value == null) {
                 _playbackFailureMessage.value = appContext.getString(R.string.error_timeout)
             }
         }, 16, TimeUnit.SECONDS)
+    }
+
+    /**
+     * If the SwarmCloud loopback URL fails before playback is established,
+     * retry the original provider URL exactly once.
+     */
+    private fun scheduleDirectFallbackIfAvailable(): Boolean {
+        val current = activeLoad ?: return false
+        val directUrl = current.directFallbackUrl ?: return false
+        if (!directFallbackScheduled.compareAndSet(false, true)) return true
+
+        Log.w(TAG, "SwarmCloud local playback failed; retrying the direct stream once")
+        onMpvQueue {
+            applyLoadNow(
+                current.copy(
+                    url = directUrl,
+                    directFallbackUrl = null,
+                ),
+            )
+        }
+        return true
     }
 
     // ---------------------------------------------------------------------

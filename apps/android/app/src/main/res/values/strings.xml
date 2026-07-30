@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">IZ Play</string>
+    <string name="app_name">IZ Play Mobile</string>
 
     <!-- Common controls -->
     <string name="common_back">Back</string>
@@ -175,20 +175,20 @@
     <string name="picker_series_categories">Series categories</string>
 
     <!-- Detail screens -->
-    <string name="detail_loading_movie">Loading movie…</string>
-    <string name="detail_loading_series">Loading series…</string>
-    <string name="detail_loading_playlist">Loading playlist…</string>
-    <string name="detail_seasons_loading">Loading seasons…</string>
-    <string name="detail_seasons_failed">Failed to load seasons.</string>
-    <string name="detail_no_seasons">No season info for this series.</string>
-    <string name="detail_no_episodes">No episodes in this season.</string>
-    <string name="detail_watch">Watch</string>
-    <string name="detail_director">Director</string>
+    <string name="detail_loading_movie">Carregando filme…</string>
+    <string name="detail_loading_series">Carregando série…</string>
+    <string name="detail_loading_playlist">Carregando catálogo…</string>
+    <string name="detail_seasons_loading">Carregando temporadas…</string>
+    <string name="detail_seasons_failed">Não foi possível carregar as temporadas.</string>
+    <string name="detail_no_seasons">Não há informações de temporadas.</string>
+    <string name="detail_no_episodes">Não há episódios nesta temporada.</string>
+    <string name="detail_watch">Assistir</string>
+    <string name="detail_director">Direção</string>
     <string name="detail_trailer_failed">Couldn\'t open trailer.</string>
-    <string name="detail_episode_default">Episode</string>
-    <string name="detail_episode_count_format">%1$d episodes</string>
-    <string name="detail_favorite_add">Add to favorites</string>
-    <string name="detail_favorite_remove">Remove from favorites</string>
+    <string name="detail_episode_default">Episódio</string>
+    <string name="detail_episode_count_format">%1$d episódios</string>
+    <string name="detail_favorite_add">Adicionar aos favoritos</string>
+    <string name="detail_favorite_remove">Remover dos favoritos</string>
 
     <!-- M3U dashboard -->
     <string name="m3u_load_error_generic">Something went wrong.</string>
@@ -233,9 +233,11 @@
     <string name="external_player_not_found">No app found that can play video (VLC, MX Player, …).</string>
 
     <!-- Errors -->
-    <string name="error_server_unreachable">Cannot reach server.</string>
+    <string name="error_server_unreachable">Não foi possível reproduzir este conteúdo.</string>
     <string name="error_timeout">Connection timed out.</string>
     <string name="error_player_init">Failed to start the player.</string>
+    <string name="player_playback_unavailable">Não foi possível reproduzir este conteúdo</string>
+    <string name="player_try_again_later">Tente novamente em alguns instantes.</string>
     <string name="error_generic">Something went wrong.</string>
 
     <!-- Player track sheet -->

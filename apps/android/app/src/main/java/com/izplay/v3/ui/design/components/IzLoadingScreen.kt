@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalConfiguration
 import com.izplay.v3.R
 import com.izplay.v3.ui.design.tokens.IzColor
 
@@ -46,6 +47,7 @@ fun IzLoadingScreen(
     modifier: Modifier = Modifier,
     message: String? = null,
 ) {
+    val isMobile = LocalConfiguration.current.screenWidthDp < 600
     val transition = rememberInfiniteTransition(label = "izLoading")
     val offset by transition.animateFloat(
         initialValue = -0.45f,
@@ -75,12 +77,12 @@ fun IzLoadingScreen(
                 painter = painterResource(R.drawable.izplay_logo),
                 contentDescription = "IZ Play",
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.width(300.dp),
+                modifier = Modifier.width(if (isMobile) 260.dp else 300.dp),
             )
             Spacer(Modifier.height(34.dp))
             Box(
                 Modifier
-                    .width(260.dp)
+                    .width(if (isMobile) 220.dp else 260.dp)
                     .height(3.dp)
                     .clip(RoundedCornerShape(3.dp))
                     .background(Color.White.copy(alpha = 0.13f)),
@@ -89,7 +91,7 @@ fun IzLoadingScreen(
                     Modifier
                         .fillMaxHeight()
                         .fillMaxWidth(0.38f)
-                        .offset(x = (offset * 260).dp)
+                        .offset(x = (offset * if (isMobile) 220 else 260).dp)
                         .clip(RoundedCornerShape(3.dp))
                         .background(
                             Brush.horizontalGradient(listOf(IzColor.Primary, Color(0xFFFF5A62))),
@@ -99,10 +101,11 @@ fun IzLoadingScreen(
             if (!message.isNullOrEmpty()) {
                 Spacer(Modifier.height(18.dp))
                 Text(
-                    message,
+                    if (isMobile) "CARREGANDO\n$message" else message,
                     color = IzColor.TextSecondary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 )
             }
         }

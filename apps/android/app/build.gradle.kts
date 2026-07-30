@@ -8,9 +8,9 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-// Nomeia os artefatos como IZPlay-V3-<variant>.apk em vez de app-<variant>.apk.
+// Nomeia os artefatos como IZPlay-Mobile-<variant>.apk.
 base {
-    archivesName.set("IZPlay-V3")
+    archivesName.set("IZPlay-Mobile")
 }
 
 // DNS padrão do provedor (login apenas com usuário/senha, como no V2).
@@ -21,12 +21,31 @@ val izplayProps = Properties().apply {
     if (f.exists()) f.inputStream().use { load(it) }
 }
 
+// Local-only SwarmCloud credential. `local.properties` is gitignored and the
+// token is intentionally optional so contributors can build without one.
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+val swarmCloudToken = localProps.getProperty("SWARMCLOUD_TOKEN", "")
+    .replace("\\", "\\\\")
+    .replace("\"", "\\\"")
+val updateApiUrl = izplayProps.getProperty(
+    "izplay.updateApiUrl",
+    "https://admin.izplay.tv/api/client/updates",
+).replace("\\", "\\\\").replace("\"", "\\\"")
+val updateChannel = izplayProps.getProperty("izplay.updateChannel", "internal")
+    .replace("\\", "\\\\").replace("\"", "\\\"")
+
 android {
     namespace = "com.izplay.v3"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.izplay.v3"
+        // Identidade instalável própria: pode coexistir com o IZ Play Android TV.
+        // O namespace Kotlin permanece temporariamente em com.izplay.v3 para
+        // preservar JNI e evitar uma migração estrutural durante o rebranding.
+        applicationId = "com.izplay.mobile"
         // As TV boxes rk322x alvo do IZ Play reportam API 25 (Android 7.1),
         // apesar de anunciarem "Android 11.1" no marketing. minSdk 24 as cobre.
         // Todo uso de API 26+ (PiP, canais de notificação, AudioFocusRequest)
@@ -34,7 +53,8 @@ android {
         // Verificado por `lint` (checagem NewApi) com esta minSdk.
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
+        // Política: 3.0.0 => 30000, 3.0.1 => 30001, 3.1.0 => 30100.
+        versionCode = 30000
         versionName = "3.0.0"
 
         buildConfigField(
@@ -42,6 +62,13 @@ android {
             "DEFAULT_DNS",
             "\"${izplayProps.getProperty("izplay.defaultDns", "")}\"",
         )
+        buildConfigField(
+            "String",
+            "SWARMCLOUD_TOKEN",
+            "\"$swarmCloudToken\"",
+        )
+        buildConfigField("String", "UPDATE_API_URL", "\"$updateApiUrl\"")
+        buildConfigField("String", "UPDATE_CHANNEL", "\"$updateChannel\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -124,6 +151,13 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.kotlinx.serialization.json)
+
+    // SwarmCloud P2P SDK — dependency/configuration only in this phase.
+    // Engine initialization and playback URL rewriting are intentionally deferred.
+    implementation("com.swarmcloud:datachannel_native:latest.release")
+    implementation("com.swarmcloud:p2p_engine:latest.release")
+    implementation("com.orhanobut:logger:2.2.0")
+    implementation("com.google.code.gson:gson:2.9.0")
 
     // Coil — image loading for the dashboard's category shelves
     // (Android counterpart of iOS `CachedImage`).

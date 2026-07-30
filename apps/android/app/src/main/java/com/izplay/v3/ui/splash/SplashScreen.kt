@@ -4,7 +4,13 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -14,6 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.izplay.v3.ui.design.IzTheme
 import com.izplay.v3.ui.design.components.IzLogo
 import com.izplay.v3.ui.design.tokens.IzColor
@@ -48,12 +55,21 @@ fun SplashScreen(
                 .background(IzColor.Background),
             contentAlignment = Alignment.Center,
         ) {
-            IzLogo(
-                height = 88.dp,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
+                    .fillMaxWidth()
                     .alpha(alpha.value)
                     .scale(scale.value),
-            )
+            ) {
+                IzLogo(height = 104.dp, modifier = Modifier.fillMaxWidth(0.72f))
+                Spacer(Modifier.height(34.dp))
+                Text(
+                    text = "C A R R E G A N D O",
+                    color = IzColor.TextPrimary,
+                    fontSize = 13.sp,
+                )
+            }
         }
     }
 }

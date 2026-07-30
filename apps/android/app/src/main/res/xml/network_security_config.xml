@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Preserve the app's existing HTTP compatibility for Xtream providers. -->
+    <base-config cleartextTrafficPermitted="true" />
+    <!-- SwarmCloud exposes its local playback proxy through loopback. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>

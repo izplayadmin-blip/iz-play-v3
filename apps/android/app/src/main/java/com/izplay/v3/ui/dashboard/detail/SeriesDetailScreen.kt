@@ -45,7 +45,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.izplay.v3.data.FavoriteRepository
@@ -142,13 +141,9 @@ fun SeriesDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        text = series?.name ?: "",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
+                // O título já aparece no bloco de informações do conteúdo.
+                // Mantemos a barra superior somente para voltar e favoritar.
+                title = {},
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri")
@@ -256,7 +251,7 @@ private fun SeriesDetailContent(
             primaryTitle = androidx.compose.ui.res.stringResource(com.izplay.v3.R.string.detail_watch),
             onPrimary = onWatchFirst,
             primaryIcon = Icons.Default.PlayArrow,
-            trailerTitle = series.youtubeTrailer.normaliseTrailer()?.let { "Fragman" },
+            trailerTitle = series.youtubeTrailer.normaliseTrailer()?.let { "Trailer" },
             onTrailer = series.youtubeTrailer.normaliseTrailer()?.let { url -> { onTrailer(url) } },
         )
 
@@ -272,7 +267,7 @@ private fun SeriesDetailContent(
 
         val cast = series.cast?.trim().orEmpty()
         if (cast.isNotEmpty()) {
-            DetailInfoTextBlock(label = "Oyuncular", value = cast, maxLines = 3)
+            DetailInfoTextBlock(label = "Elenco", value = cast, maxLines = 3)
         }
 
         // Seasons section.
@@ -334,7 +329,7 @@ private fun SeasonsSection(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Sezonlar",
+                text = "Temporadas",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f),

@@ -12,6 +12,7 @@ import com.izplay.v3.data.PlaybackUrlBuilder
 import com.izplay.v3.data.local.EpisodeEntity
 import com.izplay.v3.data.local.WatchHistoryEntity
 import com.izplay.v3.player.MPVPlayer
+import com.izplay.v3.player.SwarmCloudManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -100,8 +101,7 @@ class PlayerViewModel(
         MPVPlayer(application)
     } catch (t: Throwable) {
         Log.e(TAG, "MPVPlayer() construction failed", t)
-        val detail = "${t.javaClass.simpleName}: ${t.message ?: "unknown"}"
-        _resolveError.value = application.getString(R.string.resolve_player_init_failed, detail)
+        _resolveError.value = application.getString(R.string.error_player_init)
         null
     }
 
@@ -209,7 +209,7 @@ class PlayerViewModel(
                 )
                 // Resume from saved progress if any (iOS `historyManager.resume`).
                 val resumeSeconds = readResumeSeconds(watchMeta!!.historyId)
-                mpv.load(url, play = true, startSeconds = resumeSeconds, liveLowLatency = false)
+                loadWithP2pFallback(mpv, url, resumeSeconds, liveLowLatency = false)
             }
             Kind.SERIES_EPISODE -> {
                 val episode = app.seriesRepository.findEpisode(streamRef)
@@ -245,7 +245,7 @@ class PlayerViewModel(
                     containerExtension = episode.containerExtension,
                 )
                 val resumeSeconds = readResumeSeconds(watchMeta!!.historyId)
-                mpv.load(url, play = true, startSeconds = resumeSeconds, liveLowLatency = false)
+                loadWithP2pFallback(mpv, url, resumeSeconds, liveLowLatency = false)
             }
             Kind.LIVE -> {
                 val streamId = streamRef.toIntOrNull()
@@ -264,8 +264,14 @@ class PlayerViewModel(
                     secondaryTitle = null,
                     imageUrl = channel.streamIcon,
                 )
-                val url = builder.liveUrl(streamId = channel.streamId)
-                mpv.load(url, play = true, startSeconds = null, liveLowLatency = true)
+                // Full-screen live playback requests HLS so SwarmCloud can
+                // parse the manifest. The zapping preview stays direct and
+                // extensionless to avoid running two P2P streams at once.
+                val url = builder.liveUrl(
+                    streamId = channel.streamId,
+                    extension = "m3u8",
+                )
+                loadWithP2pFallback(mpv, url, startSeconds = null, liveLowLatency = true)
             }
             Kind.M3U_CHANNEL -> {
                 val channel = app.appDatabaseForDownloads
@@ -285,9 +291,25 @@ class PlayerViewModel(
                     secondaryTitle = channel.groupTitle,
                     imageUrl = channel.tvgLogo,
                 )
-                mpv.load(channel.url, play = true, startSeconds = null, liveLowLatency = true)
+                loadWithP2pFallback(mpv, channel.url, startSeconds = null, liveLowLatency = true)
             }
         }
+    }
+
+    private fun loadWithP2pFallback(
+        mpv: MPVPlayer,
+        originalUrl: String,
+        startSeconds: Double?,
+        liveLowLatency: Boolean,
+    ) {
+        val resolved = SwarmCloudManager.resolvePlaybackUrl(originalUrl)
+        mpv.load(
+            url = resolved.playbackUrl,
+            directFallbackUrl = resolved.directFallbackUrl,
+            play = true,
+            startSeconds = startSeconds,
+            liveLowLatency = liveLowLatency,
+        )
     }
 
     private suspend fun readResumeSeconds(historyId: String): Double? {

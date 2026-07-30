@@ -34,6 +34,9 @@ import com.izplay.v3.ui.dashboard.category.SeriesCategoryDetailScreen
 import com.izplay.v3.ui.dashboard.detail.MovieDetailScreen
 import com.izplay.v3.ui.dashboard.detail.SeriesDetailScreen
 import com.izplay.v3.ui.favorites.FavoritesScreen
+import com.izplay.v3.ui.profile.MobileProfileScreen
+import com.izplay.v3.ui.profile.MobileAccountScreen
+import com.izplay.v3.ui.profile.MobileSettingsScreen
 import com.izplay.v3.ui.playlist.AddM3UPlaylistScreen
 import com.izplay.v3.ui.player.PlayerScreen
 import com.izplay.v3.ui.player.PlayerViewModel
@@ -192,6 +195,15 @@ fun AppNavigation() {
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString(ARG_PLAYLIST_ID)
                 ?: return@composable
+            val profileStore = LocalProfileStore.current
+            val profileState by profileStore.state.collectAsState()
+            var accountVisible by rememberSaveable(id) { mutableStateOf(false) }
+            var settingsVisible by rememberSaveable(id) { mutableStateOf(false) }
+            var accountPlaylist by remember(id) { mutableStateOf<com.izplay.v3.model.Playlist?>(null) }
+            androidx.compose.runtime.LaunchedEffect(id) {
+                profileStore.enterPlaylist(id)
+                accountPlaylist = playlistRepository.find(id)
+            }
 
             // Branch on playlist kind: Xtream dashboards have the
             // Live/VOD/Series triple, M3U has one flat channel list.
@@ -210,7 +222,35 @@ fun AppNavigation() {
                 navController.popBackStack()
             }
 
-            when (resolvedKind) {
+            if (profileState.playlistId == id && profileState.pickerVisible) {
+                MobileProfileScreen(
+                    state = profileState,
+                    onSelect = { profileStore.select(id, it) },
+                    onCreate = { name, avatar, genres -> profileStore.create(id, name, avatar, genres) },
+                    onClose = profileStore::closePicker,
+                )
+            } else if (settingsVisible && accountPlaylist != null) {
+                MobileSettingsScreen(
+                    playlist = accountPlaylist!!,
+                    onBack = { settingsVisible = false },
+                )
+            } else if (accountVisible && accountPlaylist != null) {
+                MobileAccountScreen(
+                    playlist = accountPlaylist!!,
+                    profileState = profileState,
+                    appVersion = com.izplay.v3.BuildConfig.VERSION_NAME,
+                    onBack = { accountVisible = false },
+                    onOpenSettings = { settingsVisible = true },
+                    onManageProfiles = {
+                        accountVisible = false
+                        profileStore.openPicker(id)
+                    },
+                    onChangeLogin = {
+                        accountVisible = false
+                        navController.navigate(Routes.xtream(id))
+                    },
+                )
+            } else when (resolvedKind) {
                 PlaylistKind.M3U -> {
                     M3uDashboardScreen(
                         playlistId = id,
@@ -258,6 +298,7 @@ fun AppNavigation() {
                             navController.navigate(Routes.playerSeries(id, eid))
                         },
                         appVersion = com.izplay.v3.BuildConfig.VERSION_NAME,
+                        onOpenProfiles = { accountVisible = true },
                     )
                 }
             }
