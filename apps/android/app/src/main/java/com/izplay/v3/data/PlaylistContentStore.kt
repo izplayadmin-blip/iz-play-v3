@@ -152,14 +152,27 @@ class PlaylistContentStore(
             _isLoading.value = false
 
             // Phase 2 — content in parallel.
-            val (live, vod, series) = parallelStreams(playlist.id)
+            kotlinx.coroutines.coroutineScope {
+                val liveDeferred = async { database.liveStreamDao().getWithCategory(playlist.id) }
+                val vodDeferred = async { database.vodStreamDao().getWithCategory(playlist.id) }
+                val seriesDeferred = async { database.seriesDao().getWithCategory(playlist.id) }
+
+                val live = liveDeferred.await()
+                if (loadToken != token) return@coroutineScope
+                _liveStreams.value = live
+                _liveStreamsByCategoryId.value = live.groupBy { it.stream.categoryId.orEmpty() }
+
+                val vod = vodDeferred.await()
+                if (loadToken != token) return@coroutineScope
+                _vodStreams.value = vod
+                _vodStreamsByCategoryId.value = vod.groupBy { it.stream.categoryId.orEmpty() }
+
+                val series = seriesDeferred.await()
+                if (loadToken != token) return@coroutineScope
+                _seriesItems.value = series
+                _seriesItemsByCategoryId.value = series.groupBy { it.series.categoryId.orEmpty() }
+            }
             if (loadToken != token) return
-            _liveStreams.value = live
-            _liveStreamsByCategoryId.value = live.groupBy { it.stream.categoryId.orEmpty() }
-            _vodStreams.value = vod
-            _vodStreamsByCategoryId.value = vod.groupBy { it.stream.categoryId.orEmpty() }
-            _seriesItems.value = series
-            _seriesItemsByCategoryId.value = series.groupBy { it.series.categoryId.orEmpty() }
             _streamsLoaded.value = true
         } catch (e: Throwable) {
             if (loadToken != token) return
@@ -190,13 +203,23 @@ class PlaylistContentStore(
         _seriesCategories.value = cats.series
         _streamsLoaded.value = false
 
-        val (live, vod, series) = parallelStreams(playlistId)
-        _liveStreams.value = live
-        _liveStreamsByCategoryId.value = live.groupBy { it.stream.categoryId.orEmpty() }
-        _vodStreams.value = vod
-        _vodStreamsByCategoryId.value = vod.groupBy { it.stream.categoryId.orEmpty() }
-        _seriesItems.value = series
-        _seriesItemsByCategoryId.value = series.groupBy { it.series.categoryId.orEmpty() }
+        kotlinx.coroutines.coroutineScope {
+            val liveDeferred = async { database.liveStreamDao().getWithCategory(playlistId) }
+            val vodDeferred = async { database.vodStreamDao().getWithCategory(playlistId) }
+            val seriesDeferred = async { database.seriesDao().getWithCategory(playlistId) }
+
+            val live = liveDeferred.await()
+            _liveStreams.value = live
+            _liveStreamsByCategoryId.value = live.groupBy { it.stream.categoryId.orEmpty() }
+
+            val vod = vodDeferred.await()
+            _vodStreams.value = vod
+            _vodStreamsByCategoryId.value = vod.groupBy { it.stream.categoryId.orEmpty() }
+
+            val series = seriesDeferred.await()
+            _seriesItems.value = series
+            _seriesItemsByCategoryId.value = series.groupBy { it.series.categoryId.orEmpty() }
+        }
         _streamsLoaded.value = true
     }
 
